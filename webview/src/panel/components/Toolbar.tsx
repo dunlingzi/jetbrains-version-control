@@ -97,7 +97,7 @@ export function Toolbar() {
       }}
     >
       <SearchInput
-        placeholder="Search commits, hash..."
+        placeholder="Search commits..."
         defaultValue={filter.searchQuery}
         onChange={handleSearch}
       />
