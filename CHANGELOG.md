@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-09-12
+
 ### Added / 新增
 - **Annotate with Git Blame** — WebStorm-style inline blame annotations for every line, with click-to-jump to the Git Log commit graph / WebStorm 风格的行内 blame 注释，点击注释跳转到 Git Log 提交图并定位提交
   - Gutter (line number) right-click menu: `Annotate with Git Blame` / `Close Annotations` / 行号右键菜单触发，菜单项互斥切换
@@ -18,9 +20,14 @@
   - Prune button with JetBrains clearCash icon / 清理按钮使用 JetBrains clearCash 图标
   - Sidebar collapse/expand toggle / 侧边栏折叠/展开切换
   - Location defaults to repo root, remembers per-repo preference / Location 默认为仓库根目录，按仓库记忆上次选择
+- **Commit hash search** — search commits by hash in the search bar / 搜索栏支持按 commit hash 搜索提交
 
 ### Changed / 变更
 - Renamed extension to **JetBrains Git Control** (short brand: JGC); extension ID changed from `idea-like-git-graph` to `jetbrains-git-control` / 插件更名为 JetBrains Git Control（短标识 JGC），扩展 ID 由 `idea-like-git-graph` 改为 `jetbrains-git-control`
+
+### Fixed / 修复
+- **Commit panel text selection** — disabled mouse text selection in commit panel file list / 禁用 commit 面板文件列表的文字选中
+- **Worktree table header uppercase** — removed `text-transform: uppercase` from worktree table header / 移除 worktree 表头的全大写样式
 
 ## [0.4.17] - 2026-06-20
 
