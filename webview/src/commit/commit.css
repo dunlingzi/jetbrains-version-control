@@ -255,6 +255,7 @@
   gap: 4px;
   min-height: 26px;
   box-sizing: border-box;
+  user-select: none;
 }
 
 .commit-file-item:hover {
