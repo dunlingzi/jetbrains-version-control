@@ -1,16 +1,16 @@
 # Changelog / 更新日志
 
-## [Unreleased]
-
 ## [1.1.1] - 2026-09-12
 
 ### Added / 新增
-- **Annotate with Git Blame** — WebStorm-style inline blame annotations for every line, with click-to-jump to the Git Log commit graph / WebStorm 风格的行内 blame 注释，点击注释跳转到 Git Log 提交图并定位提交
-  - Gutter (line number) right-click menu: `Annotate with Git Blame` / `Close Annotations` / 行号右键菜单触发，菜单项互斥切换
-  - **Annotation View** submenu (nested under gutter menu): multi-select columns Revision / Date (default on) / Author (default on) / Commit Number, plus nested **Colors** (Author / Order (default) / Hide) and **Names** (Initials / Last Name / First Name / Full Name / Email) radio submenus; at least one column must stay enabled / 注释视图子菜单：Revision、Date（默认选）、Author（默认选）、Commit Number 多选；内嵌 Colors（Author / Order（默认）/ Hide 单选）与 Names（作者名显示方式单选）子菜单；至少保留一列
-  - JetBrains-style age-based coloring, configurable via `jgc.blame.colorMode` / 按提交新旧程度渐变着色（新→蓝、中→绿、旧→灰）
-  - Display scope config: whole file / cursor line only / N lines around cursor (`jgc.blame.displayMode`) / 展示范围可配置：全文件 / 仅光标行 / 光标前后 N 行
-  - Date format config (`jgc.blame.dateFormat`, default `yyyy-MM-dd HH:mm`), hash off by default / 日期格式可配置，默认不显示 hash
+- **Commit hash search** — search commits by hash in the search bar / 搜索栏支持按 commit hash 搜索提交
+
+### Fixed / 修复
+- **Commit panel text selection** — disabled mouse text selection in commit panel file list / 禁用 commit 面板文件列表的文字选中
+- **Worktree table header uppercase** — removed `text-transform: uppercase` from worktree table header / 移除 worktree 表头的全大写样式
+
+## [1.1.0] - 2026-08-29
+### Added / 新增
 - **Git Worktree** — sidebar panel for managing Git worktrees (JetBrains-style) / Git Worktree 侧边栏面板（JetBrains 风格）
   - Worktree list with branch, path columns; main worktree protection / 工作树列表显示分支和路径列，主工作树受保护不可删除
   - New Worktree dialog: searchable branch/tag dropdown (local + origin/* + tags), input filtering, auto-fill project name / 新建工作树对话框：可搜索分支/标签下拉、输入过滤、自动填充项目名
@@ -20,14 +20,21 @@
   - Prune button with JetBrains clearCash icon / 清理按钮使用 JetBrains clearCash 图标
   - Sidebar collapse/expand toggle / 侧边栏折叠/展开切换
   - Location defaults to repo root, remembers per-repo preference / Location 默认为仓库根目录，按仓库记忆上次选择
-- **Commit hash search** — search commits by hash in the search bar / 搜索栏支持按 commit hash 搜索提交
+
+## [1.0.0] - 2026-08-28
+### Added / 新增
+- **Annotate with Git Blame** — WebStorm-style inline blame annotations for every line, with click-to-jump to the Git Log commit graph / WebStorm 风格的行内 blame 注释，点击注释跳转到 Git Log 提交图并定位提交
+  - Gutter (line number) right-click menu: `Annotate with Git Blame` / `Close Annotations` / 行号右键菜单触发，菜单项互斥切换
+  - **Annotation View** submenu (nested under gutter menu): multi-select columns Revision / Date (default on) / Author (default on) / Commit Number, plus nested **Colors** (Author / Order (default) / Hide) and **Names** (Initials / Last Name / First Name / Full Name / Email) radio submenus; at least one column must stay enabled / 注释视图子菜单：Revision、Date（默认选）、Author（默认选）、Commit Number 多选；内嵌 Colors（Author / Order（默认）/ Hide 单选）与 Names（作者名显示方式单选）子菜单；至少保留一列
+  - JetBrains-style age-based coloring, configurable via `jgc.blame.colorMode` / 按提交新旧程度渐变着色（新→蓝、中→绿、旧→灰）
+  - Display scope config: whole file / cursor line only / N lines around cursor (`jgc.blame.displayMode`) / 展示范围可配置：全文件 / 仅光标行 / 光标前后 N 行
+  - Date format config (`jgc.blame.dateFormat`, default `yyyy-MM-dd HH:mm`), hash off by default / 日期格式可配置，默认不显示 hash
 
 ### Changed / 变更
 - Renamed extension to **JetBrains Git Control** (short brand: JGC); extension ID changed from `idea-like-git-graph` to `jetbrains-git-control` / 插件更名为 JetBrains Git Control（短标识 JGC），扩展 ID 由 `idea-like-git-graph` 改为 `jetbrains-git-control`
 
 ### Fixed / 修复
-- **Commit panel text selection** — disabled mouse text selection in commit panel file list / 禁用 commit 面板文件列表的文字选中
-- **Worktree table header uppercase** — removed `text-transform: uppercase` from worktree table header / 移除 worktree 表头的全大写样式
+- **GitLog panel text selection** — disabled mouse text selection in GitLog panel file list / 禁用 Git Log 面板文件列表的文字选中
 
 ## [0.4.17] - 2026-06-20
 
