@@ -129,7 +129,6 @@
   font-weight: 600;
   color: var(--vscode-descriptionForeground, #999);
   border-bottom: 1px solid var(--vscode-widget-border, #3c3c3c);
-  text-transform: uppercase;
   letter-spacing: 0.5px;
   user-select: none;
   -webkit-user-select: none;
