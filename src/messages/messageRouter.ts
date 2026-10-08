@@ -11,9 +11,12 @@ export type CommandHandler = (
   params: Record<string, unknown>,
 ) => Promise<unknown>;
 
+export type BroadcastListener = (event: EventType, data: unknown) => void;
+
 export class MessageRouter {
   private webviews = new Set<vscode.Webview>();
   private handlers = new Map<string, CommandHandler>();
+  private broadcastListeners = new Set<BroadcastListener>();
 
   /** Register a command handler */
   handle(command: string, handler: CommandHandler): void {
@@ -36,11 +39,24 @@ export class MessageRouter {
     };
   }
 
+  /** Observe broadcasts on the extension-host side, not just in webviews */
+  onBroadcast(listener: BroadcastListener): vscode.Disposable {
+    this.broadcastListeners.add(listener);
+    return {
+      dispose: () => {
+        this.broadcastListeners.delete(listener);
+      },
+    };
+  }
+
   /** Broadcast an event to all registered webviews */
   broadcastEvent(event: EventType, data: unknown): void {
     const msg: EventMessage = { type: "event", event, data };
     for (const webview of this.webviews) {
       webview.postMessage(msg);
+    }
+    for (const listener of this.broadcastListeners) {
+      listener(event, data);
     }
   }
 

@@ -117,7 +117,9 @@ export type CommandType =
   | "removeWorktree"
   | "pruneWorktrees"
   | "openWorktree"
-  | "pickFolder";
+  | "pickFolder"
+  | "setContext"
+  | "getConfig";
 
 export interface Bridge {
   request(

@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { bridge } from "../../shared/bridge";
 import { useModifierClickSelection } from "../../shared/hooks/useModifierClickSelection";
+import { isPlainArrowKey } from "../../shared/keyboard";
 import { usePanelStore } from "../../shared/store/panel-store";
 import type { Commit } from "../../shared/types/git";
 import { CommitContextMenu } from "./CommitContextMenu";
@@ -181,7 +182,7 @@ export function CommitList({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
+      if (!isPlainArrowKey(e)) return;
       if (!visibleCommits.length) return;
 
       // Only handle when no input is focused

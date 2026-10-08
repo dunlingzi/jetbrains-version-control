@@ -1,3 +1,4 @@
+import { useMultiClick } from "../../shared/hooks/useMultiClick";
 import type { WorkingTreeFile } from "../../shared/store/commit-store";
 import { getCommitFileIcon } from "../utils/file-icon";
 
@@ -8,6 +9,7 @@ export interface FileItemProps {
   onToggle: () => void;
   onContextMenu: (e: React.MouseEvent) => void;
   onShowDiff: () => void;
+  onJumpToSource: () => void;
   onClick: (e: React.MouseEvent) => void;
 }
 
@@ -18,6 +20,7 @@ export function FileItem({
   onToggle,
   onContextMenu,
   onShowDiff,
+  onJumpToSource,
   onClick,
 }: FileItemProps) {
   const parts = file.path.split("/");
@@ -28,11 +31,16 @@ export function FileItem({
   const statusColor = getStatusColor(file.status);
   const FileIcon = getCommitFileIcon(file.path);
 
+  const handleClick = useMultiClick<React.MouseEvent>({
+    1: onClick,
+    2: onShowDiff,
+    3: onJumpToSource,
+  });
+
   return (
     <div
       className={`commit-file-item ${highlighted ? "highlighted" : ""}`}
-      onDoubleClick={onShowDiff}
-      onClick={onClick}
+      onClick={handleClick}
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();

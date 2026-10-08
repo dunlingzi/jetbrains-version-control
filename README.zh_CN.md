@@ -10,7 +10,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 [![VS Code](https://img.shields.io/badge/VS%20Code-1.85.0%2B-blue)](https://code.visualstudio.com/)
-[![Version](https://img.shields.io/badge/Version-1.1.1-green)](./package.json)
+[![Version](https://img.shields.io/badge/Version-1.1.2-green)](./package.json)
 
 > **注意**：本项目 fork 自 [JetBrains Git - IntelliJ IDEA Git Graph, Commit & Shelf for VS Code](https://github.com/aotemj/jetbrains-git-graph)，新增了 inline git blame 注解和提交图导航功能。
 

@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { bridge } from "../bridge";
+import type { SelectionMode } from "../hooks/useModifierClickSelection";
 
 export interface WorkingTreeFile {
   path: string;
@@ -38,6 +39,8 @@ interface CommitStore {
   selectedFiles: Set<string>;
   /** Files highlighted via click/Cmd+click (for context menu operations) */
   highlightedFiles: Set<string>;
+  /** Anchor for Shift range selection of `highlightedFiles` */
+  lastHighlightedKey: string | null;
 
   // Commit state
   commitMessage: string;
@@ -67,7 +70,11 @@ interface CommitStore {
   setFileKeys: (keys: string[], selected: boolean) => void;
   selectAllFiles: () => void;
   deselectAllFiles: () => void;
-  highlightFile: (key: string, mode: "single" | "toggle") => void;
+  highlightFile: (
+    key: string,
+    mode: SelectionMode,
+    orderedKeys: string[],
+  ) => void;
   stageFile: (filePath: string) => Promise<void>;
   unstageFile: (filePath: string) => Promise<void>;
   stageAll: () => Promise<void>;
@@ -76,6 +83,8 @@ interface CommitStore {
   commitAndPush: () => Promise<boolean>;
   rollbackFile: (filePath: string) => Promise<void>;
   showDiff: (filePath: string, staged?: boolean) => Promise<void>;
+  openSourceFile: (filePath: string) => Promise<void>;
+  jumpToHighlightedSource: () => void;
   shelveChanges: (message?: string, filePaths?: string[]) => Promise<void>;
   unshelveChanges: (stashId: string, drop?: boolean) => Promise<void>;
   deleteShelve: (stashId: string) => Promise<void>;
@@ -97,6 +106,7 @@ export const useCommitStore = create<CommitStore>((set, get) => ({
   changes: [],
   selectedFiles: new Set<string>(),
   highlightedFiles: new Set<string>(),
+  lastHighlightedKey: null,
   commitMessage: "",
   amend: false,
   shelves: [],
@@ -117,17 +127,31 @@ export const useCommitStore = create<CommitStore>((set, get) => ({
       )) as WorkingTreeFile[];
       if (Array.isArray(result)) {
         const newPaths = new Set(result.map((f) => `${f.path}:${f.staged}`));
-        const { selectedFiles, changes } = get();
+        const { selectedFiles, highlightedFiles, changes } = get();
+        const keepExisting = (keys: Set<string>) => {
+          const kept = new Set<string>();
+          for (const key of keys) {
+            if (newPaths.has(key)) kept.add(key);
+          }
+          return kept;
+        };
         if (changes.length === 0) {
           // First load — no auto-selection (user manually selects files)
-          set({ changes: result, selectedFiles: new Set<string>() });
+          set({
+            changes: result,
+            selectedFiles: new Set<string>(),
+            highlightedFiles: new Set<string>(),
+            lastHighlightedKey: null,
+          });
         } else {
           // Refresh — preserve user's selection state (only keep existing selections)
-          const preserved = new Set<string>();
-          for (const p of selectedFiles) {
-            if (newPaths.has(p)) preserved.add(p);
-          }
-          set({ changes: result, selectedFiles: preserved });
+          const anchor = get().lastHighlightedKey;
+          set({
+            changes: result,
+            selectedFiles: keepExisting(selectedFiles),
+            highlightedFiles: keepExisting(highlightedFiles),
+            lastHighlightedKey: anchor && newPaths.has(anchor) ? anchor : null,
+          });
         }
       }
     } catch (err) {
@@ -210,11 +234,24 @@ export const useCommitStore = create<CommitStore>((set, get) => ({
     set({ selectedFiles: new Set() });
   },
 
-  highlightFile(key: string, mode: "single" | "toggle") {
-    const { highlightedFiles } = get();
-    if (mode === "single") {
-      set({ highlightedFiles: new Set([key]) });
-    } else {
+  highlightFile(key: string, mode: SelectionMode, orderedKeys: string[]) {
+    const { highlightedFiles, lastHighlightedKey } = get();
+
+    if (mode === "range" && lastHighlightedKey) {
+      const anchorIdx = orderedKeys.indexOf(lastHighlightedKey);
+      const targetIdx = orderedKeys.indexOf(key);
+      if (anchorIdx !== -1 && targetIdx !== -1) {
+        const start = Math.min(anchorIdx, targetIdx);
+        const end = Math.max(anchorIdx, targetIdx);
+        set({
+          highlightedFiles: new Set(orderedKeys.slice(start, end + 1)),
+          lastHighlightedKey: key,
+        });
+        return;
+      }
+    }
+
+    if (mode === "toggle") {
       // toggle (Cmd+click)
       const next = new Set(highlightedFiles);
       if (next.has(key)) {
@@ -222,8 +259,11 @@ export const useCommitStore = create<CommitStore>((set, get) => ({
       } else {
         next.add(key);
       }
-      set({ highlightedFiles: next });
+      set({ highlightedFiles: next, lastHighlightedKey: key });
+      return;
     }
+
+    set({ highlightedFiles: new Set([key]), lastHighlightedKey: key });
   },
 
   async stageFile(filePath: string) {
@@ -330,6 +370,28 @@ export const useCommitStore = create<CommitStore>((set, get) => ({
     } catch (err) {
       console.error("showDiff failed:", err);
     }
+  },
+
+  async openSourceFile(filePath: string) {
+    try {
+      await bridge.request("openFile", { filePath });
+    } catch (err) {
+      console.error("openSourceFile failed:", err);
+    }
+  },
+
+  /** Jump to Source for the focused/highlighted row (F4, Cmd+Down). */
+  jumpToHighlightedSource() {
+    const { changes, highlightedFiles, lastHighlightedKey } = get();
+    const key =
+      (lastHighlightedKey && highlightedFiles.has(lastHighlightedKey)
+        ? lastHighlightedKey
+        : undefined) ??
+      (highlightedFiles.size === 1 ? [...highlightedFiles][0] : undefined);
+    if (!key) return;
+    const file = changes.find((f) => `${f.path}:${f.staged}` === key);
+    if (!file) return;
+    void get().openSourceFile(file.path);
   },
 
   async shelveChanges(message?: string, filePaths?: string[]) {

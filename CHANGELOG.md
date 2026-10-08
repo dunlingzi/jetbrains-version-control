@@ -1,5 +1,25 @@
 # Changelog / 更新日志
 
+## [1.1.2] - 2026-10-08
+
+### Added / 新增
+- **Triple-click jumps to source** — in the Commit panel file list: single click selects, double click opens the diff, triple click opens the file / Commit 面板文件列表支持三击跳转源码：单击选中，双击打开 diff，三击打开文件
+- **Shift-click range selection** — select a contiguous run of files in the Commit panel / Commit 面板支持按住 Shift 连续选择多个文件
+- **Jump to Source shortcut** — `F4`, plus `Cmd+↓` on macOS and `Ctrl+↓` on Windows/Linux / 跳转源码快捷键：`F4`，macOS 额外支持 `Cmd+↓`，Windows/Linux 支持 `Ctrl+↓`
+  - Works in the Commit panel, the Git Log Changed Files list, and inside a diff editor / Commit 面板、Git Log 的 Changed Files 列表、diff 编辑器内均可用
+  - In a diff editor it opens the file on disk and jumps to the line the cursor is on / 在 diff 编辑器中会打开磁盘上的文件并定位到光标所在行
+  - Can be rebound in **Preferences: Open Keyboard Shortcuts** / 可在 **Preferences: Open Keyboard Shortcuts** 中重新绑定
+  - Context menus show the shortcut beside **Jump to Source** and **Edit Source** / 右键菜单中 **Jump to Source** 与 **Edit Source** 旁显示快捷键
+- **Commit badge** — the Commit entry in the activity bar shows how many files are pending, matching the count in VS Code's own Source Control view / Commit 侧边栏图标显示待处理的文件数量，与 VS Code 自带源代码管理视图的数字一致
+- **New setting** `jgc.shortcut.jumpToSourceLabel` — text shown beside the shortcut in context menus; leave empty to hide it / 新增设置 `jgc.shortcut.jumpToSourceLabel`，控制右键菜单中快捷键的显示文案，留空则隐藏
+
+### Fixed / 修复
+- The **Changed Files** header was shown in all caps / **Changed Files** 标题显示为全大写
+- Double-clicking a file in **Changed Files** highlighted its name as text / 双击 **Changed Files** 里的文件会把文件名选成文字
+- Newly created, renamed or deleted untracked files did not appear in the Commit panel until an unrelated action triggered a refresh / 新建、重命名或删除未追踪文件后，Commit 面板不会立即刷新，需要其他操作触发
+- Pressing Shift showed a stray border around the Commit file list / 按 Shift 会在 Commit 文件列表周围出现多余边框
+- Selection could keep referring to files that no longer existed after a refresh / 刷新后选中状态会残留已不存在的文件
+
 ## [1.1.1] - 2026-09-12
 
 ### Added / 新增

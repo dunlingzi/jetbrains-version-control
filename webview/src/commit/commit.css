@@ -233,6 +233,14 @@
   font-weight: 400;
 }
 
+/* The file list is focusable for arrow-key navigation, which moves the row
+   highlight. Suppress the UA focus ring: pressing a modifier (Shift) flips the
+   :focus-visible heuristic and would otherwise pop a raw unthemed ring. */
+.commit-group-files:focus,
+.commit-group-files:focus-visible {
+  outline: none;
+}
+
 .commit-group-checkbox {
   margin-right: 6px;
   width: 16px;
