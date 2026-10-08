@@ -13,6 +13,11 @@
 - **Commit badge** — the Commit entry in the activity bar shows how many files are pending, matching the count in VS Code's own Source Control view / Commit 侧边栏图标显示待处理的文件数量，与 VS Code 自带源代码管理视图的数字一致
 - **New setting** `jgc.shortcut.jumpToSourceLabel` — text shown beside the shortcut in context menus; leave empty to hide it / 新增设置 `jgc.shortcut.jumpToSourceLabel`，控制右键菜单中快捷键的显示文案，留空则隐藏
 
+### Changed / 变更
+- **Smaller extension package** — the VSIX shrank from 3.69 MB to 2.48 MB, a 33% reduction, so download and install are faster / 扩展包体积从 3.69 MB 缩减到 2.48 MB，减少 33%，下载与安装更快
+  - Editor and IDE working files that were being packaged by mistake are no longer shipped / 不再打包误混入的编辑器与 IDE 工作文件
+  - Two unused images were dropped / 移除两张未被引用的图片
+
 ### Fixed / 修复
 - The **Changed Files** header was shown in all caps / **Changed Files** 标题显示为全大写
 - Double-clicking a file in **Changed Files** highlighted its name as text / 双击 **Changed Files** 里的文件会把文件名选成文字
