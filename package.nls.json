@@ -17,6 +17,7 @@
   "contrib.cmd.commitAndPush": "Commit and Push",
   "contrib.cmd.shelve": "Shelve Changes",
   "contrib.cmd.unshelve": "Unshelve Changes",
+  "contrib.cmd.jumpToSource": "Jump to Source",
   "contrib.cmd.push": "Push...",
   "contrib.cmd.editSource": "(JGC) Edit Source",
   "contrib.cmd.annotate": "Annotate with Git Blame",

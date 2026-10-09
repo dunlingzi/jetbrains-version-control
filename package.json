@@ -154,7 +154,7 @@
       },
       {
         "command": "git-brains.commit.jumpToSource",
-        "title": "Jump to Source",
+        "title": "%contrib.cmd.jumpToSource%",
         "icon": "$(go-to-file)",
         "category": "JGC"
       },

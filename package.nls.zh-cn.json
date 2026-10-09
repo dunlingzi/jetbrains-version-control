@@ -17,6 +17,7 @@
   "contrib.cmd.commitAndPush": "提交并推送",
   "contrib.cmd.shelve": "搁置更改",
   "contrib.cmd.unshelve": "取消搁置更改",
+  "contrib.cmd.jumpToSource": "跳转源码",
   "contrib.cmd.push": "推送...",
   "contrib.cmd.editSource": "(JGC) 编辑源",
   "contrib.cmd.annotate": "使用 Git Blame 标注",

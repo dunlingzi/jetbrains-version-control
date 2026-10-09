@@ -24,7 +24,8 @@ export function getWebviewHtml(
 
   const dataAttrs = [`data-mode="${mode}"`];
   // i18n:注入当前语言(默认跟随 vscode.env.language,可用 jgc.locale 强制覆盖)
-  dataAttrs.push(`data-locale="${escapeHtml(currentLocale())}"`);
+  const locale = currentLocale();
+  dataAttrs.push(`data-locale="${escapeHtml(locale)}"`);
   if (extra) {
     for (const [key, value] of Object.entries(extra)) {
       dataAttrs.push(`data-${key}="${escapeHtml(value)}"`);
@@ -32,7 +33,7 @@ export function getWebviewHtml(
   }
 
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="${escapeHtml(locale)}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
