@@ -437,7 +437,7 @@ export class BlameManager implements vscode.Disposable {
       );
     } else {
       void vscode.window.showInformationMessage(
-        "JGC: No active annotation to clear.",
+        vscode.l10n.t("JGC: No active annotation to clear."),
       );
     }
   }
