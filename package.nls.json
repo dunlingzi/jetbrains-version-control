@@ -26,6 +26,7 @@
   "contrib.config.title": "JetBrains Git Control",
   "contrib.config.locale": "User-interface language for the JGC panels. Leave empty to follow the VS Code display language automatically (recommended). Set a value such as `en` or `zh-cn` to force a language. Requires a window reload to take effect.",
   "contrib.config.locale.auto": "Follow the VS Code display language (auto)",
+  "contrib.config.shortcut.jumpToSourceLabel": "Text shown next to **Jump to Source** / **Edit Source** in context menus. Webview menus are drawn by the extension, so this label cannot be derived from your keybindings automatically — update it (or set it to empty to hide) if you rebind the shortcut under **Preferences: Open Keyboard Shortcuts**.",
   "contrib.config.blame.displayMode.desc": "Controls which lines show inline Git blame annotations.",
   "contrib.config.blame.displayMode.all": "Annotate every line of the file",
   "contrib.config.blame.displayMode.cursor": "Only the line under the cursor",
