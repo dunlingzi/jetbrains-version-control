@@ -1,5 +1,13 @@
 # Changelog / 更新日志
 
+## [Unreleased]
+
+### Fixed / 修复
+- **Non-ASCII filenames** — Chinese and other non-ASCII filenames were shown as octal escape sequences such as `\344\270\255\346\226\207.txt` instead of `中文.txt`, and every Git operation on them (open diff, stage, discard, shelve) failed. Reported by @dunlingzi in #3, fixed in #4 / 中文等非 ASCII 文件名会显示成八进制转义串（如 `\344\270\255\346\226\207.txt`）而非文件名本身，且对这些文件的 Git 操作（打开 diff、暂存、撤销、shelve）全部失败 - 由 @dunlingzi 在 #3 中报告，#4 修复
+  - Paths are now decoded before use, so Git receives the real filename / 路径在使用前会先解码，Git 收到的是真实文件名
+  - Filenames containing a space, a double quote or an arrow are handled too, including a file literally named `a -> b` / 同时也能正确处理含空格、双引号或箭头的文件名，包括名字里就带 `a -> b` 的文件
+- **Files missing from an IDEA shelf** — a shelf could omit files whose name forced Git to quote the path, so restoring it left those changes behind / IDEA Shelf 的文件列表可能漏掉路径被 Git 加引号的文件，恢复后这些改动会丢失
+
 ## [1.1.2] - 2026-10-08
 
 ### Added / 新增
