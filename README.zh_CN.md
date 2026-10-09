@@ -158,11 +158,12 @@ JGC 会自动跟随 **VS Code 的显示语言**。通过“配置显示语言”
 - VS Code 贡献点（视图、命令、配置标题）通过 `package.nls.<locale>.json` 本地化
 - 扩展通知通过 `vscode.l10n` API 与 `l10n/bundle.l10n.<locale>.json` 本地化
 
-**新增一门语言**（只需一步关键操作）：
+**新增一门语言**（一个词典文件加少量注册）：
 
-1. 复制 `webview/src/l10n/en.json` → `webview/src/l10n/<locale>.json`（如 `fr.json`）并翻译所有值。这个单一文件驱动所有界面（webview 字符串 + `contrib.*` 键）。
+1. 复制 `webview/src/l10n/en.json` → `webview/src/l10n/<locale>.json`（如 `fr.json`）并翻译所有值。这个单一文件驱动 webview 字符串与 `contrib.*` 键。
 2. （可选）注册该语言的展示名。
 3. 运行 `pnpm run generate:nls` 重新生成 `package.nls.<locale>.json` 并提交，再重新构建。
+4. 主机通知不由词典派生：还需手工添加 `l10n/bundle.l10n.<locale>.json`（按英文原文键控），并为 `jgc.locale` 增加枚举项。
 
 缺失的键会自动回退到英文，因此部分翻译永远不会弄坏界面。
 

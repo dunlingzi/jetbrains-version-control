@@ -11,11 +11,12 @@
 **架构**（保留，不重构）：
 
 ```
-webview/src/l10n/en.json + zh-cn.json          ← 唯一语言源（一语言一文件）
+webview/src/l10n/en.json + zh-cn.json          ← webview 唯一语言源（一语言一文件）
    │ scripts/sync-nls.mjs（构建期派生，生成物提交 git）
-   ├──▶ package.nls.{json,zh-cn.json}           → contributes %key% 模板化（54 处）
-   └──▶ l10n/bundle.l10n.{json,zh-cn.json}      → 主机 vscode.l10n.t()
-                                                   （34 处通知 + blame 3 条 + 确认框按钮）
+   └──▶ package.nls.{json,zh-cn.json}           → contributes %key% 模板化（54 处）
+
+l10n/bundle.l10n.{json,zh-cn.json}             主机 vscode.l10n.t() 用；手工维护，非脚本派生
+                                               （34 处通知 + blame 3 条 + 确认框按钮）
 
 Webview 运行时：自研 t()/tpl() + import.meta.glob（全部语言打包进 webview bundle）
   · store / t / bundle / languages 四个模块；data-locale 由 html.ts 注入
@@ -24,6 +25,8 @@ Webview 运行时：自研 t()/tpl() + import.meta.glob（全部语言打包进 
 
 语言解析：默认跟随 vscode.env.language；jgc.locale（""|en|zh-cn）可覆盖；Reload Window 生效
 ```
+
+> 注：`sync-nls.mjs` 只派生 `package.nls*`；`l10n/bundle.l10n.*` 是手工维护的翻译（按英文源串键控）。新增语言时除 `webview/src/l10n/<locale>.json` 外，还需手工添加 `l10n/bundle.l10n.<locale>.json`（主机通知），并在 `jgc.locale` 枚举中增加条目。
 
 **已完成**：webview 全量替换（29 组件）、contributes、配置描述 27 条、主机通知、README(en/zh)/CHANGELOG、测试与构建、冒烟。
 
@@ -140,7 +143,7 @@ Webview 运行时：自研 t()/tpl() + import.meta.glob（全部语言打包进 
 ## 5. 范围外
 
 - webview 迁移到官方 `@vscode/l10n`（路径选择时已否决——迁移成本高、收益仅为"更官方"）
-- 新语言（机制已就绪：加 `webview/src/l10n/<locale>.json` + 跑 `sync-nls` 即可）
+- 新语言（机制已就绪：加 `webview/src/l10n/<locale>.json` + 跑 `sync-nls`；`l10n/bundle.l10n.<locale>.json` 与 `jgc.locale` 枚举另需手工补，见 §1 注）
 - `jgc.locale` 保留（既有实现已含，默认跟随 + 可覆盖）
 - README 文档的 marketplace 本地化命名（`README.zh_CN.md` 现状不动）
 - 从零设计 spec（c97da07）的实施

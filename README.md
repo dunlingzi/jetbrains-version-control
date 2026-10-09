@@ -157,13 +157,15 @@ together (webview panels, the activity bar, command palette, notifications, merg
 - VS Code contribution points (views, commands, configuration title) localize via `package.nls.<locale>.json`
 - Extension notifications localize via the `vscode.l10n` API and `l10n/bundle.l10n.<locale>.json`
 
-**Adding a language** (only one step required):
+**Adding a language** (one dictionary plus a few registrations):
 
 1. Copy `webview/src/l10n/en.json` → `webview/src/l10n/<locale>.json` (e.g. `fr.json`) and translate
-   every value. This single file drives *all* surfaces (webview strings + `contrib.*` keys).
+   every value. This single file drives the webview strings and the `contrib.*` keys.
 2. Optional: register a display name for the language.
 3. Run `pnpm run generate:nls` to regenerate `package.nls.<locale>.json` and commit it,
    then rebuild.
+4. Host notifications are not derived from the dictionary: hand-add `l10n/bundle.l10n.<locale>.json`
+   (keyed by the English source strings) and add a `jgc.locale` enum entry.
 
 Missing keys fall back to English, so a partial translation never breaks the UI.
 
