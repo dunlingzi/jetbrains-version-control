@@ -2,9 +2,9 @@
 
 - 日期：2026-10-08
 - 状态：待复核（复核通过后转 writing-plans 生成实施计划）
-- 背景：本日最初按"从零接入 i18n"完成了一套设计（含 webview 官方 `@vscode/l10n` 方案）；复核阶段发现 `origin/feat/i18n` 已有 **2026-08-30 完工的完整实现**（仅 Phase G 未做），路径改为**收尾**。从零设计的 spec 已废弃（无实现）；其内容由维护者作为历史记录移植至本分支（提交 974c99d），仅供追溯。
+- 背景：本日最初按"从零接入 i18n"完成了一套设计（含 webview 官方 `@vscode/l10n` 方案）；复核阶段发现 `upstream/feat/i18n` 已有 **2026-08-30 完工的完整实现**（仅 Phase G 未做），路径改为**收尾**。从零设计的 spec 已废弃（无实现）；其内容由维护者作为历史记录移植至本分支（提交 974c99d），仅供追溯。
 
-## 1. 既有实现盘点（origin/feat/i18n，已推送、未合并）
+## 1. 既有实现盘点（upstream/feat/i18n，已推送、未合并）
 
 **规模**：16 commits / 56 files vs main；webview 词典 en/zh-cn 各 **333 key**；`package.nls` 54 key；`l10n/bundle` 标准 `[en, zh]` 元组 42 条。webview vitest 28 passed；构建全绿；F5 冒烟已过。
 
@@ -73,11 +73,13 @@ Webview 运行时：自研 t()/tpl() + import.meta.glob（全部语言打包进 
 - WSL 冒烟（项目既有流程）：三步构建打包 → `code-server --install-extension` 安装 → 以唯一字符串字面量 grep 证明新构建生效；zh-cn 下过全矩阵（7 个 webview + 命令面板 + 设置页 + 状态栏 + 提交/搁置/拣选关键路径）
 - **复核点 B**：`gitService` 3 条罕见自撰错误（如 "No changes to shelve"）——Aug 版决定不本地化（穿透成本不成比例；git stderr 本就英文）。**建议维持**，如需本地化在 S2 一并补齐
 
-### S4 Phase G：合回 main
+### S4 Phase G：合回 main（fork → 上游 PR 流程）
 
-- push feat/i18n → 用 `gh` CLI 开 PR（github MCP 的 create_pull_request 不可用，避免踩坑）
-- PR 内容：实现综述 + 术语口径（链接本 spec）+ 验证证据
-- 合并方式：Merge commit（与 PR #1 一致）
+- 仓库流程：本地 `origin`=dunlingzi fork；上游 `witt-bit/jetbrains-version-control`（`upstream` remote；i18n 分支托管于 `upstream/feat/i18n`）
+- push feat/i18n（fork 流为主；或经维护者确认后直推上游分支）→ 用 `gh` CLI 向上游开 PR：
+  `gh pr create -R witt-bit/jetbrains-version-control --base main --head dunlingzi:feat/i18n`（github MCP 的 create_pull_request 不可用）
+- PR 内容：实现综述 + 术语口径（链接本 spec）+ 验证证据；含 docs 在内全部内容已脱敏
+- 维护者习惯 **squash merge**（PR #4 先例）：我方 commit SHA 不会出现在上游，勿依赖
 
 ## 3. 术语修订基准：IDEA 官方中文
 
@@ -156,5 +158,5 @@ Webview 运行时：自研 t()/tpl() + import.meta.glob（全部语言打包进 
 | D1 | 路径 | 复活 feat/i18n 收尾；不重做、webview 不迁移官方机制 |
 | D2 | Stash 术语 | 搁置系（用户 IDE 口径） |
 | D3 | Shelf tab 命名 | 保留英文 "Shelf"（复核点 A） |
-| D4 | 合并方式 | merge main 进 feat/i18n；PR 用 merge commit |
+| D4 | 合并与 PR | merge main 进 feat/i18n；PR 走 fork → 上游流程（维护者 squash merge，见 S4） |
 | D5 | gitService 3 条 | 维持不译（复核点 B） |
