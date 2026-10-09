@@ -89,7 +89,7 @@ Webview 运行时：自研 t()/tpl() + import.meta.glob（全部语言打包进 
 
 | JGC 英文 | 中文 | 说明 |
 |---|---|---|
-| Shelf tab（.idea/shelf，IDEA 兼容） | **Shelf**（复核点 A；备选"搁置区"） | 与 Stash tab 避免重名 |
+| Shelf tab（.idea/shelf，IDEA 兼容） | **搁置区** | 用户 IDEA 中文界面口径（2026-10-09 冒烟确认） |
 | Stash tab（git stash） | **搁置** | 用户 IDE 口径；官方文档旧译"储藏/储存"、2025.2 正文"隐藏"均备查 |
 | Shelve Changes / Unshelve | 搁置更改 / 取消搁置 | IDEA 官方中文 |
 | Restore | 还原 | IDEA 官方中文 |
@@ -108,6 +108,7 @@ Webview 运行时：自研 t()/tpl() + import.meta.glob（全部语言打包进 
 | Commit Message | 提交消息 | 文档亦作"提交信息"，统一"提交消息" |
 | Changes | 更改 | |
 | Staged / Unstage | 已暂存 / 取消暂存 | git staging 语境，VS Code 生态惯例（与 stash 的"搁置"刻意错开） |
+| Unversioned Files | 未进行版本管理的文件 | 用户 IDEA 中文界面口径（2026-10-09 冒烟确认；官方文档作"未受版本控制的文件"，从用户所见） |
 | Amend | 修正提交 | IDEA 官方中文 |
 | Merge / Rebase | 合并 / 变基 | |
 | Cherry-Pick | 拣选 | 文档标题曾用"挑选"，按钮与操作流程为"拣选"，从后者 |
@@ -146,7 +147,7 @@ Webview 运行时：自研 t()/tpl() + import.meta.glob（全部语言打包进 
 
 ## 6. 复核点清单
 
-- **A**：tab 对最终命名——Stash=「搁置」已定；Shelf=「Shelf」（英文）还是「搁置区」？请对照你的 IDEA 界面拍板
+- **A**：（已定，2026-10-09 冒烟）Stash tab=「搁置」、Shelf tab=「搁置区」——用户对照 IDEA 中文界面确认
 - **B**：`gitService` 3 条自撰错误维持不译？
 - **C**：附录 A 术语表有无需调整条目（如 Cherry-Pick→拣选、Restore→还原）
 - **D**：S1 合并冲突原则（双方都保）认可否
@@ -157,6 +158,6 @@ Webview 运行时：自研 t()/tpl() + import.meta.glob（全部语言打包进 
 |---|---|---|
 | D1 | 路径 | 复活 feat/i18n 收尾；不重做、webview 不迁移官方机制 |
 | D2 | Stash 术语 | 搁置系（用户 IDE 口径） |
-| D3 | Shelf tab 命名 | 保留英文 "Shelf"（复核点 A） |
+| D3 | Shelf tab 命名 | **搁置区**（2026-10-09 冒烟中按用户 IDEA 中文界面确认，覆盖原"保留英文"） |
 | D4 | 合并与 PR | merge main 进 feat/i18n；PR 走 fork → 上游流程（维护者 squash merge，见 S4） |
 | D5 | gitService 3 条 | 维持不译（复核点 B） |
