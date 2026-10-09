@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { bridge } from "../../shared/bridge";
 import { t, tpl } from "../../shared/i18n";
+import { useFocusContextKey } from "../../shared/hooks/useFocusContextKey";
+import {
+  type SelectionMode,
+  useModifierClickSelection,
+} from "../../shared/hooks/useModifierClickSelection";
+import { isPlainArrowKey } from "../../shared/keyboard";
 import {
   useCommitStore,
   type WorkingTreeFile,
@@ -18,11 +24,13 @@ export function CommitTab() {
     expandedGroups,
     groupByDirectory,
     showUnversioned,
+    collapsedDirs,
     toggleGroup,
     toggleFileSelection,
     setFileKeys,
     highlightFile,
     showDiff,
+    openSourceFile,
     fetchChanges,
     ideaShelveChanges,
   } = useCommitStore();
@@ -66,6 +74,73 @@ export function CommitTab() {
         conflictedFiles: conflicted,
       };
     }, [changes]);
+
+  // Flat list of every visible file key, in the exact order the rows render.
+  // Shared by Shift range selection and (via FileGroup) keyboard navigation so
+  // the two can never drift apart.
+  const orderedKeys = useMemo(() => {
+    const base = { groupByDirectory, collapsedDirs };
+    return [
+      ...collectVisibleKeys(conflictedFiles, {
+        ...base,
+        expanded: expandedGroups.has("conflicts"),
+      }),
+      ...collectVisibleKeys(changedFiles, {
+        ...base,
+        expanded: expandedGroups.has("changes"),
+      }),
+      ...collectVisibleKeys(stagedFiles, {
+        ...base,
+        expanded: expandedGroups.has("staged"),
+      }),
+      ...(showUnversioned
+        ? collectVisibleKeys(untrackedFiles, {
+            ...base,
+            expanded: expandedGroups.has("unversioned"),
+          })
+        : []),
+    ];
+  }, [
+    conflictedFiles,
+    changedFiles,
+    stagedFiles,
+    untrackedFiles,
+    expandedGroups,
+    groupByDirectory,
+    showUnversioned,
+    collapsedDirs,
+  ]);
+
+  const handleHighlightFile = useCallback(
+    (key: string, mode: SelectionMode) => {
+      highlightFile(key, mode, orderedKeys);
+    },
+    [highlightFile, orderedKeys],
+  );
+
+  const handleFileClick =
+    useModifierClickSelection<string>(handleHighlightFile);
+
+  const handleJumpToSource = useCallback(
+    (filePath: string) => {
+      void openSourceFile(filePath);
+    },
+    [openSourceFile],
+  );
+
+  // Jump to Source (F4 / Cmd+Down). Subscribed from a component rather than at
+  // store module scope so the listener only exists in the Commit webview —
+  // a module-level listener would also fire in the Git Log and Worktree
+  // webviews and open the file three times.
+  useFocusContextKey("jgc.commitPanelFocused");
+  useEffect(() => {
+    return bridge.onEvent((event) => {
+      // The broadcast reaches every webview, so only act if this one is the one
+      // the shortcut was pressed in.
+      if (event !== "jumpToSourceRequested" || !document.hasFocus()) return;
+      useCommitStore.getState().jumpToHighlightedSource();
+    });
+  }, []);
 
   const handleShelveSelected = useCallback(async () => {
     const selectedPaths = changes
@@ -149,7 +224,9 @@ export function CommitTab() {
             highlightedFiles={highlightedFiles}
             onToggleFile={toggleFileSelection}
             onSetFileKeys={setFileKeys}
-            onHighlightFile={highlightFile}
+            onHighlightFile={handleHighlightFile}
+            onFileClick={handleFileClick}
+            onJumpToSource={handleJumpToSource}
             onShowDiff={showDiff}
             onContextMenu={handleContextMenu}
             onDirContextMenu={handleDirContextMenu}
@@ -183,7 +260,9 @@ export function CommitTab() {
             highlightedFiles={highlightedFiles}
             onToggleFile={toggleFileSelection}
             onSetFileKeys={setFileKeys}
-            onHighlightFile={highlightFile}
+            onHighlightFile={handleHighlightFile}
+            onFileClick={handleFileClick}
+            onJumpToSource={handleJumpToSource}
             onShowDiff={showDiff}
             onContextMenu={handleContextMenu}
             onDirContextMenu={handleDirContextMenu}
@@ -203,7 +282,9 @@ export function CommitTab() {
             highlightedFiles={highlightedFiles}
             onToggleFile={toggleFileSelection}
             onSetFileKeys={setFileKeys}
-            onHighlightFile={highlightFile}
+            onHighlightFile={handleHighlightFile}
+            onFileClick={handleFileClick}
+            onJumpToSource={handleJumpToSource}
             onShowDiff={showDiff}
             onContextMenu={handleContextMenu}
             onDirContextMenu={handleDirContextMenu}
@@ -223,7 +304,9 @@ export function CommitTab() {
             highlightedFiles={highlightedFiles}
             onToggleFile={toggleFileSelection}
             onSetFileKeys={setFileKeys}
-            onHighlightFile={highlightFile}
+            onHighlightFile={handleHighlightFile}
+            onFileClick={handleFileClick}
+            onJumpToSource={handleJumpToSource}
             onShowDiff={showDiff}
             onContextMenu={handleContextMenu}
             onDirContextMenu={handleDirContextMenu}
@@ -269,7 +352,9 @@ interface FileGroupProps {
   highlightedFiles: Set<string>;
   onToggleFile: (key: string) => void;
   onSetFileKeys: (keys: string[], selected: boolean) => void;
-  onHighlightFile: (key: string, mode: "single" | "toggle") => void;
+  onHighlightFile: (key: string, mode: SelectionMode) => void;
+  onFileClick: (e: React.MouseEvent, key: string) => void;
+  onJumpToSource: (filePath: string) => void;
   onShowDiff: (path: string, staged?: boolean) => Promise<void>;
   onContextMenu: (e: React.MouseEvent, file: WorkingTreeFile) => void;
   onDirContextMenu: (
@@ -292,6 +377,8 @@ function FileGroup({
   onToggleFile,
   onSetFileKeys,
   onHighlightFile,
+  onFileClick,
+  onJumpToSource,
   onShowDiff,
   onContextMenu,
   onDirContextMenu,
@@ -312,35 +399,17 @@ function FileGroup({
     }
   };
 
-  // Build flat ordered list of visible file keys for keyboard navigation
+  // Flat ordered list of visible file keys for keyboard navigation
   const { collapsedDirs } = useCommitStore();
-  const visibleKeys = useMemo(() => {
-    if (!expanded) return [];
-    if (!groupByDirectory) {
-      return files.map((f) => `${f.path}:${f.staged}`);
-    }
-    // In directory mode, walk the tree respecting collapsed state
-    const tree = buildDirTree(files);
-    const keys: string[] = [];
-    function walk(node: DirNode) {
-      for (const child of [...node.children].sort((a, b) =>
-        a.name.localeCompare(b.name),
-      )) {
-        if (!collapsedDirs.has(child.fullPath)) {
-          walk(child);
-        }
-      }
-      for (const file of node.files) {
-        keys.push(`${file.path}:${file.staged}`);
-      }
-    }
-    walk(tree);
-    return keys;
-  }, [expanded, groupByDirectory, files, collapsedDirs]);
+  const visibleKeys = useMemo(
+    () =>
+      collectVisibleKeys(files, { expanded, groupByDirectory, collapsedDirs }),
+    [expanded, groupByDirectory, files, collapsedDirs],
+  );
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+      if (!isPlainArrowKey(e)) return;
       e.preventDefault();
 
       if (visibleKeys.length === 0) return;
@@ -404,6 +473,8 @@ function FileGroup({
               onToggleFile={onToggleFile}
               onSetFileKeys={onSetFileKeys}
               onHighlightFile={onHighlightFile}
+              onFileClick={onFileClick}
+              onJumpToSource={onJumpToSource}
               onShowDiff={onShowDiff}
               onContextMenu={onContextMenu}
               onDirContextMenu={onDirContextMenu}
@@ -419,11 +490,9 @@ function FileGroup({
                   highlighted={highlightedFiles.has(key)}
                   onToggle={() => onToggleFile(key)}
                   onShowDiff={() => onShowDiff(file.path, file.staged)}
+                  onJumpToSource={() => onJumpToSource(file.path)}
                   onContextMenu={(e) => onContextMenu(e, file)}
-                  onClick={(e) => {
-                    const mode = e.metaKey || e.ctrlKey ? "toggle" : "single";
-                    onHighlightFile(key, mode);
-                  }}
+                  onClick={(e) => onFileClick(e, key)}
                 />
               );
             })
@@ -432,6 +501,41 @@ function FileGroup({
       )}
     </div>
   );
+}
+
+/**
+ * File keys in render order for one group: directories (sorted, skipping
+ * collapsed ones) first, then this directory's files. Kept in lockstep with
+ * `DirNodeView` so Shift ranges always match what the user sees.
+ */
+function collectVisibleKeys(
+  files: WorkingTreeFile[],
+  options: {
+    expanded: boolean;
+    groupByDirectory: boolean;
+    collapsedDirs: Set<string>;
+  },
+): string[] {
+  const { expanded, groupByDirectory, collapsedDirs } = options;
+  if (!expanded) return [];
+  if (!groupByDirectory) {
+    return files.map((f) => `${f.path}:${f.staged}`);
+  }
+  const keys: string[] = [];
+  const walk = (node: DirNode) => {
+    for (const child of [...node.children].sort((a, b) =>
+      a.name.localeCompare(b.name),
+    )) {
+      if (!collapsedDirs.has(child.fullPath)) {
+        walk(child);
+      }
+    }
+    for (const file of node.files) {
+      keys.push(`${file.path}:${file.staged}`);
+    }
+  };
+  walk(buildDirTree(files));
+  return keys;
 }
 
 /* ─── Directory Tree View ────────────────────────────────────────── */
@@ -504,6 +608,8 @@ function DirectoryTree({
   onToggleFile,
   onSetFileKeys,
   onHighlightFile,
+  onFileClick,
+  onJumpToSource,
   onShowDiff,
   onContextMenu,
   onDirContextMenu,
@@ -513,7 +619,9 @@ function DirectoryTree({
   highlightedFiles: Set<string>;
   onToggleFile: (key: string) => void;
   onSetFileKeys: (keys: string[], selected: boolean) => void;
-  onHighlightFile: (key: string, mode: "single" | "toggle") => void;
+  onHighlightFile: (key: string, mode: SelectionMode) => void;
+  onFileClick: (e: React.MouseEvent, key: string) => void;
+  onJumpToSource: (filePath: string) => void;
   onShowDiff: (path: string, staged?: boolean) => Promise<void>;
   onContextMenu: (e: React.MouseEvent, file: WorkingTreeFile) => void;
   onDirContextMenu: (
@@ -536,6 +644,8 @@ function DirectoryTree({
       onToggleFile={onToggleFile}
       onSetFileKeys={onSetFileKeys}
       onHighlightFile={onHighlightFile}
+      onFileClick={onFileClick}
+      onJumpToSource={onJumpToSource}
       onShowDiff={onShowDiff}
       onContextMenu={onContextMenu}
       onDirContextMenu={onDirContextMenu}
@@ -553,6 +663,8 @@ function DirNodeView({
   onToggleFile,
   onSetFileKeys,
   onHighlightFile,
+  onFileClick,
+  onJumpToSource,
   onShowDiff,
   onContextMenu,
   onDirContextMenu,
@@ -565,7 +677,9 @@ function DirNodeView({
   highlightedFiles: Set<string>;
   onToggleFile: (key: string) => void;
   onSetFileKeys: (keys: string[], selected: boolean) => void;
-  onHighlightFile: (key: string, mode: "single" | "toggle") => void;
+  onHighlightFile: (key: string, mode: SelectionMode) => void;
+  onFileClick: (e: React.MouseEvent, key: string) => void;
+  onJumpToSource: (filePath: string) => void;
   onShowDiff: (path: string, staged?: boolean) => Promise<void>;
   onContextMenu: (e: React.MouseEvent, file: WorkingTreeFile) => void;
   onDirContextMenu: (
@@ -639,6 +753,8 @@ function DirNodeView({
                   onToggleFile={onToggleFile}
                   onSetFileKeys={onSetFileKeys}
                   onHighlightFile={onHighlightFile}
+                  onFileClick={onFileClick}
+                  onJumpToSource={onJumpToSource}
                   onShowDiff={onShowDiff}
                   onContextMenu={onContextMenu}
                   onDirContextMenu={onDirContextMenu}
@@ -658,11 +774,9 @@ function DirNodeView({
               highlighted={highlightedFiles.has(key)}
               onToggle={() => onToggleFile(key)}
               onShowDiff={() => onShowDiff(file.path, file.staged)}
+              onJumpToSource={() => onJumpToSource(file.path)}
               onContextMenu={(e) => onContextMenu(e, file)}
-              onClick={(e) => {
-                const mode = e.metaKey || e.ctrlKey ? "toggle" : "single";
-                onHighlightFile(key, mode);
-              }}
+              onClick={(e) => onFileClick(e, key)}
             />
           </div>
         );

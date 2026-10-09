@@ -118,7 +118,9 @@ export type CommandType =
   | "pruneWorktrees"
   | "openWorktree"
   | "getWorkspaceRoot"
-  | "pickFolder";
+  | "pickFolder"
+  | "setContext"
+  | "getConfig";
 
 export type EventType =
   | "gitStateChanged"
@@ -130,7 +132,9 @@ export type EventType =
   | "commitStateChanged"
   | "rollbackPanelInit"
   /** data: { hash: string } — jump the Git Log graph to a specific commit */
-  | "focusCommitInGraph";
+  | "focusCommitInGraph"
+  /** Open the highlighted Commit-panel file in an editor (host → webview) */
+  | "jumpToSourceRequested";
 
 export interface RemoteBranchGroup {
   remote: string;

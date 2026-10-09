@@ -1,3 +1,4 @@
+import * as path from "node:path";
 import * as vscode from "vscode";
 import type { GitCache } from "../git/cache";
 import type { MessageRouter } from "../messages/messageRouter";
@@ -106,6 +107,22 @@ export class GitWatcher implements vscode.Disposable {
     commitMsgWatcher.onDidChange(() => this.notify("log"));
     commitMsgWatcher.onDidCreate(() => this.notify("log"));
     this.disposables.push(commitMsgWatcher);
+
+    // Workspace file create/delete → status. Creating, renaming or deleting an
+    // untracked file writes neither .git/index nor a saved text document, so
+    // without this the untracked count goes stale.
+    const untrackedWatcher = vscode.workspace.createFileSystemWatcher(
+      new vscode.RelativePattern(this.workspaceRoot, "**/*"),
+    );
+    const inGitDir = (uri: vscode.Uri) =>
+      uri.fsPath.startsWith(`${this.workspaceRoot}${path.sep}.git`);
+    untrackedWatcher.onDidCreate((uri) => {
+      if (!inGitDir(uri)) this.notify("status");
+    });
+    untrackedWatcher.onDidDelete((uri) => {
+      if (!inGitDir(uri)) this.notify("status");
+    });
+    this.disposables.push(untrackedWatcher);
   }
 
   private setupEditorWatchers(): void {

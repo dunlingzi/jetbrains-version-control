@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { t } from "../../shared/i18n";
+import { useJumpToSourceShortcutLabel } from "../../shared/shortcuts";
 import type { WorkingTreeFile } from "../../shared/store/commit-store";
 import { useCommitStore } from "../../shared/store/commit-store";
 
@@ -16,6 +17,7 @@ export function CommitFileContextMenu({
   file,
   onClose,
 }: CommitFileContextMenuProps) {
+  const jumpToSourceLabel = useJumpToSourceShortcutLabel();
   const menuRef = useRef<HTMLDivElement>(null);
   const {
     stageFile,
@@ -182,6 +184,11 @@ export function CommitFileContextMenu({
       >
         <JumpIcon />
         <span>{t("commit.fileMenu.jumpToSource")}</span>
+        {jumpToSourceLabel && (
+          <span className="commit-context-menu-shortcut">
+            {jumpToSourceLabel}
+          </span>
+        )}
       </button>
 
       {/* Open in System Folder */}

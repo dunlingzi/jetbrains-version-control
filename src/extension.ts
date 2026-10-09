@@ -1,6 +1,7 @@
 import * as nodefs from "node:fs/promises";
 import * as vscode from "vscode";
 import { BlameManager } from "./blame/blameManager";
+import { jumpToSourceFromDiffEditor } from "./commands/jumpToSource";
 import { GitService } from "./git/gitService";
 import type { DiffFile, LaneSnapshot } from "./git/types";
 import { MessageRouter } from "./messages/messageRouter";
@@ -92,7 +93,9 @@ export function activate(context: vscode.ExtensionContext) {
     context.extensionUri,
     messageRouter,
     allGitServices.map((s) => s.cache),
+    allGitServices,
   );
+  context.subscriptions.push(commitProvider);
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
       CommitViewProvider.viewType,
@@ -149,6 +152,18 @@ export function activate(context: vscode.ExtensionContext) {
       "git-brains.clearGitBlameAnnotation",
       () => {
         blameManager.clear();
+      },
+    ),
+    // Jump to Source. Two sources of intent: a diff editor (resolved here, at
+    // the cursor line) or the Commit panel (whose highlighted file lives in the
+    // webview store, so the webview resolves it against its own state).
+    vscode.commands.registerCommand(
+      "git-brains.commit.jumpToSource",
+      async () => {
+        if (await jumpToSourceFromDiffEditor()) {
+          return;
+        }
+        messageRouter.broadcastEvent("jumpToSourceRequested", {});
       },
     ),
   );
@@ -1013,6 +1028,31 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   // ─── Commit Panel Handlers ───────────────────────────────────────
+
+  // Lets a webview drive a when-clause context key. VS Code exposes no context
+  // key for "this webview view has focus", which keybindings fired from inside a
+  // webview need in order to stay scoped to their own panel.
+  messageRouter.handle("setContext", async (params) => {
+    const key = params.key as string | undefined;
+    if (!key) return;
+    await vscode.commands.executeCommand(
+      "setContext",
+      key,
+      params.value as unknown,
+    );
+    return { success: true };
+  });
+
+  // Webviews have no direct access to the configuration service, so expose the
+  // values they need to reflect user customisation (e.g. shortcut labels).
+  messageRouter.handle("getConfig", async (params) => {
+    const key = params.key as string | undefined;
+    if (!key) return undefined;
+    const [section, ...rest] = key.split(".");
+    return vscode.workspace
+      .getConfiguration(section)
+      .get<unknown>(rest.join("."));
+  });
 
   messageRouter.handle("getWorkingTreeChanges", async () => {
     if (allGitServices.length === 0) return NOT_GIT_REPO;

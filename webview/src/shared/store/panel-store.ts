@@ -129,7 +129,9 @@ function filterCommits(
       const q = filter.searchQuery.toLowerCase();
       if (
         !c.subject.toLowerCase().includes(q) &&
-        !c.body.toLowerCase().includes(q)
+        !c.body.toLowerCase().includes(q) &&
+        !c.hash.toLowerCase().includes(q) &&
+        !c.shortHash.toLowerCase().includes(q)
       ) {
         return false;
       }

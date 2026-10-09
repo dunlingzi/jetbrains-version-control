@@ -2,13 +2,49 @@
 
 ## [Unreleased]
 
+### Fixed / 修复
+- **All-caps headings** — headings across the Commit, Push and Git Log panels were forced to all caps: the Commit panel's file group headers and their file counts, the section headers in the Commit toolbar, Git Log list and branch sidebar context menus, and the Push panel's remote branch sections. `UNVERSIONED FILES` and `12 FILES` now read `Unversioned Files` and `12 files`, `ON SINGLE CLICK` reads `On Single Click`, `REMOTE` and `BRANCH` read `Remote` and `Branch` / Commit、Push、Git Log 面板的标题此前被强制转为全大写：Commit 面板的文件分组标题及文件计数、Commit 工具栏与 Git Log 列表与分支侧边栏右键菜单的分节标题、Push 面板的远程分支分节标题。`UNVERSIONED FILES` 与 `12 FILES` 现显示为 `Unversioned Files` 与 `12 files`，`ON SINGLE CLICK` 显示为 `On Single Click`，`REMOTE`、`BRANCH` 显示为 `Remote`、`Branch`
+- **Non-ASCII filenames** — Chinese and other non-ASCII filenames were shown as octal escape sequences such as `\344\270\255\346\226\207.txt` instead of `中文.txt`, and every Git operation on them (open diff, stage, discard, shelve) failed. Reported by @dunlingzi in #3, fixed in #4 / 中文等非 ASCII 文件名会显示成八进制转义串（如 `\344\270\255\346\226\207.txt`）而非文件名本身，且对这些文件的 Git 操作（打开 diff、暂存、撤销、shelve）全部失败 - 由 @dunlingzi 在 #3 中报告，#4 修复
+  - Paths are now decoded before use, so Git receives the real filename / 路径在使用前会先解码，Git 收到的是真实文件名
+  - Filenames containing a space, a double quote or an arrow are handled too, including a file literally named `a -> b` / 同时也能正确处理含空格、双引号或箭头的文件名，包括名字里就带 `a -> b` 的文件
+- **Files missing from an IDEA shelf** — a shelf could omit files whose name forced Git to quote the path, so restoring it left those changes behind / IDEA Shelf 的文件列表可能漏掉路径被 Git 加引号的文件，恢复后这些改动会丢失
+
+## [1.1.2] - 2026-10-08
+
 ### Added / 新增
-- **Annotate with Git Blame** — WebStorm-style inline blame annotations for every line, with click-to-jump to the Git Log commit graph / WebStorm 风格的行内 blame 注释，点击注释跳转到 Git Log 提交图并定位提交
-  - Gutter (line number) right-click menu: `Annotate with Git Blame` / `Close Annotations` / 行号右键菜单触发，菜单项互斥切换
-  - **Annotation View** submenu (nested under gutter menu): multi-select columns Revision / Date (default on) / Author (default on) / Commit Number, plus nested **Colors** (Author / Order (default) / Hide) and **Names** (Initials / Last Name / First Name / Full Name / Email) radio submenus; at least one column must stay enabled / 注释视图子菜单：Revision、Date（默认选）、Author（默认选）、Commit Number 多选；内嵌 Colors（Author / Order（默认）/ Hide 单选）与 Names（作者名显示方式单选）子菜单；至少保留一列
-  - JetBrains-style age-based coloring, configurable via `jgc.blame.colorMode` / 按提交新旧程度渐变着色（新→蓝、中→绿、旧→灰）
-  - Display scope config: whole file / cursor line only / N lines around cursor (`jgc.blame.displayMode`) / 展示范围可配置：全文件 / 仅光标行 / 光标前后 N 行
-  - Date format config (`jgc.blame.dateFormat`, default `yyyy-MM-dd HH:mm`), hash off by default / 日期格式可配置，默认不显示 hash
+- **Triple-click jumps to source** — in the Commit panel file list: single click selects, double click opens the diff, triple click opens the file / Commit 面板文件列表支持三击跳转源码：单击选中，双击打开 diff，三击打开文件
+- **Shift-click range selection** — select a contiguous run of files in the Commit panel / Commit 面板支持按住 Shift 连续选择多个文件
+- **Jump to Source shortcut** — `F4`, plus `Cmd+↓` on macOS and `Ctrl+↓` on Windows/Linux / 跳转源码快捷键：`F4`，macOS 额外支持 `Cmd+↓`，Windows/Linux 支持 `Ctrl+↓`
+  - Works in the Commit panel, the Git Log Changed Files list, and inside a diff editor / Commit 面板、Git Log 的 Changed Files 列表、diff 编辑器内均可用
+  - In a diff editor it opens the file on disk and jumps to the line the cursor is on / 在 diff 编辑器中会打开磁盘上的文件并定位到光标所在行
+  - Can be rebound in **Preferences: Open Keyboard Shortcuts** / 可在 **Preferences: Open Keyboard Shortcuts** 中重新绑定
+  - Context menus show the shortcut beside **Jump to Source** and **Edit Source** / 右键菜单中 **Jump to Source** 与 **Edit Source** 旁显示快捷键
+- **Commit badge** — the Commit entry in the activity bar shows how many files are pending, matching the count in VS Code's own Source Control view / Commit 侧边栏图标显示待处理的文件数量，与 VS Code 自带源代码管理视图的数字一致
+- **New setting** `jgc.shortcut.jumpToSourceLabel` — text shown beside the shortcut in context menus; leave empty to hide it / 新增设置 `jgc.shortcut.jumpToSourceLabel`，控制右键菜单中快捷键的显示文案，留空则隐藏
+
+### Changed / 变更
+- **Smaller extension package** — the VSIX shrank from 3.69 MB to 2.48 MB, a 33% reduction, so download and install are faster / 扩展包体积从 3.69 MB 缩减到 2.48 MB，减少 33%，下载与安装更快
+  - Editor and IDE working files that were being packaged by mistake are no longer shipped / 不再打包误混入的编辑器与 IDE 工作文件
+  - Two unused images were dropped / 移除两张未被引用的图片
+
+### Fixed / 修复
+- The **Changed Files** header was shown in all caps / **Changed Files** 标题显示为全大写
+- Double-clicking a file in **Changed Files** highlighted its name as text / 双击 **Changed Files** 里的文件会把文件名选成文字
+- Newly created, renamed or deleted untracked files did not appear in the Commit panel until an unrelated action triggered a refresh / 新建、重命名或删除未追踪文件后，Commit 面板不会立即刷新，需要其他操作触发
+- Pressing Shift showed a stray border around the Commit file list / 按 Shift 会在 Commit 文件列表周围出现多余边框
+- Selection could keep referring to files that no longer existed after a refresh / 刷新后选中状态会残留已不存在的文件
+
+## [1.1.1] - 2026-09-12
+
+### Added / 新增
+- **Commit hash search** — search commits by hash in the search bar / 搜索栏支持按 commit hash 搜索提交
+
+### Fixed / 修复
+- **Commit panel text selection** — disabled mouse text selection in commit panel file list / 禁用 commit 面板文件列表的文字选中
+- **Worktree table header uppercase** — removed `text-transform: uppercase` from worktree table header / 移除 worktree 表头的全大写样式
+
+## [1.1.0] - 2026-08-29
+### Added / 新增
 - **Git Worktree** — sidebar panel for managing Git worktrees (JetBrains-style) / Git Worktree 侧边栏面板（JetBrains 风格）
   - Worktree list with branch, path columns; main worktree protection / 工作树列表显示分支和路径列，主工作树受保护不可删除
   - New Worktree dialog: searchable branch/tag dropdown (local + origin/* + tags), input filtering, auto-fill project name / 新建工作树对话框：可搜索分支/标签下拉、输入过滤、自动填充项目名
@@ -25,8 +61,20 @@
   - Shipped locales: English + Simplified Chinese; `jgc.locale` can force a language / 内置语言：英文 + 简体中文；可用 `jgc.locale` 强制指定
   - Adding a language is a single-file change (`webview/src/l10n/<locale>.json`) + `pnpm run generate:nls` / 新增语言只需修改单一文件并运行 `pnpm run generate:nls`
 
+## [1.0.0] - 2026-08-28
+### Added / 新增
+- **Annotate with Git Blame** — WebStorm-style inline blame annotations for every line, with click-to-jump to the Git Log commit graph / WebStorm 风格的行内 blame 注释，点击注释跳转到 Git Log 提交图并定位提交
+  - Gutter (line number) right-click menu: `Annotate with Git Blame` / `Close Annotations` / 行号右键菜单触发，菜单项互斥切换
+  - **Annotation View** submenu (nested under gutter menu): multi-select columns Revision / Date (default on) / Author (default on) / Commit Number, plus nested **Colors** (Author / Order (default) / Hide) and **Names** (Initials / Last Name / First Name / Full Name / Email) radio submenus; at least one column must stay enabled / 注释视图子菜单：Revision、Date（默认选）、Author（默认选）、Commit Number 多选；内嵌 Colors（Author / Order（默认）/ Hide 单选）与 Names（作者名显示方式单选）子菜单；至少保留一列
+  - JetBrains-style age-based coloring, configurable via `jgc.blame.colorMode` / 按提交新旧程度渐变着色（新→蓝、中→绿、旧→灰）
+  - Display scope config: whole file / cursor line only / N lines around cursor (`jgc.blame.displayMode`) / 展示范围可配置：全文件 / 仅光标行 / 光标前后 N 行
+  - Date format config (`jgc.blame.dateFormat`, default `yyyy-MM-dd HH:mm`), hash off by default / 日期格式可配置，默认不显示 hash
+
 ### Changed / 变更
 - Renamed extension to **JetBrains Git Control** (short brand: JGC); extension ID changed from `idea-like-git-graph` to `jetbrains-git-control` / 插件更名为 JetBrains Git Control（短标识 JGC），扩展 ID 由 `idea-like-git-graph` 改为 `jetbrains-git-control`
+
+### Fixed / 修复
+- **GitLog panel text selection** — disabled mouse text selection in GitLog panel file list / 禁用 Git Log 面板文件列表的文字选中
 
 ## [0.4.17] - 2026-06-20
 

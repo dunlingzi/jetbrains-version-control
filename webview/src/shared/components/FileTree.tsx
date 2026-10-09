@@ -4,6 +4,7 @@ import {
   IconFolder,
   IconFolderOpen,
 } from "../../panel/utils/file-icons";
+import { useMultiClick } from "../hooks/useMultiClick";
 import type { DiffFile } from "../types/git";
 
 // ---------------------------------------------------------------------------
@@ -154,6 +155,7 @@ export interface FileTreeProps {
   selectedFiles: string[];
   onFileClick: (e: React.MouseEvent, file: DiffFile) => void;
   onFileDoubleClick?: (file: DiffFile) => void;
+  onFileTripleClick?: (file: DiffFile) => void;
   onFileContextMenu?: (e: React.MouseEvent, file: DiffFile) => void;
   collapsed?: Record<string, boolean>;
   onToggle?: (key: string) => void;
@@ -172,6 +174,7 @@ export function FileTree({
   selectedFiles,
   onFileClick,
   onFileDoubleClick,
+  onFileTripleClick,
   onFileContextMenu,
   collapsed = {},
   onToggle,
@@ -191,6 +194,7 @@ export function FileTree({
         selectedFiles={selectedFiles}
         onFileClick={onFileClick}
         onFileDoubleClick={onFileDoubleClick}
+        onFileTripleClick={onFileTripleClick}
         onFileContextMenu={onFileContextMenu}
         renderExtraColumns={renderExtraColumns}
         renderDirExtra={renderDirExtra}
@@ -205,6 +209,7 @@ export function FileTree({
       selectedFiles={selectedFiles}
       onFileClick={onFileClick}
       onFileDoubleClick={onFileDoubleClick}
+      onFileTripleClick={onFileTripleClick}
       onFileContextMenu={onFileContextMenu}
       renderExtraColumns={renderExtraColumns}
       statusColorOverride={statusColorOverride}
@@ -224,6 +229,7 @@ function TreeView({
   selectedFiles,
   onFileClick,
   onFileDoubleClick,
+  onFileTripleClick,
   onFileContextMenu,
   renderExtraColumns,
   renderDirExtra,
@@ -236,6 +242,7 @@ function TreeView({
   selectedFiles: string[];
   onFileClick: (e: React.MouseEvent, file: DiffFile) => void;
   onFileDoubleClick?: (file: DiffFile) => void;
+  onFileTripleClick?: (file: DiffFile) => void;
   onFileContextMenu?: (e: React.MouseEvent, file: DiffFile) => void;
   renderExtraColumns?: (file: DiffFile) => React.ReactNode;
   renderDirExtra?: (dir: FileTreeNode) => React.ReactNode;
@@ -253,6 +260,7 @@ function TreeView({
           selectedFiles={selectedFiles}
           onFileClick={onFileClick}
           onFileDoubleClick={onFileDoubleClick}
+          onFileTripleClick={onFileTripleClick}
           onFileContextMenu={onFileContextMenu}
           renderExtraColumns={renderExtraColumns}
           renderDirExtra={renderDirExtra}
@@ -271,6 +279,7 @@ function FileTreeNodeView({
   selectedFiles,
   onFileClick,
   onFileDoubleClick,
+  onFileTripleClick,
   onFileContextMenu,
   renderExtraColumns,
   renderDirExtra,
@@ -283,6 +292,7 @@ function FileTreeNodeView({
   selectedFiles: string[];
   onFileClick: (e: React.MouseEvent, file: DiffFile) => void;
   onFileDoubleClick?: (file: DiffFile) => void;
+  onFileTripleClick?: (file: DiffFile) => void;
   onFileContextMenu?: (e: React.MouseEvent, file: DiffFile) => void;
   renderExtraColumns?: (file: DiffFile) => React.ReactNode;
   renderDirExtra?: (dir: FileTreeNode) => React.ReactNode;
@@ -300,6 +310,11 @@ function FileTreeNodeView({
         onDoubleClick={
           onFileDoubleClick
             ? () => node.file && onFileDoubleClick(node.file)
+            : undefined
+        }
+        onTripleClick={
+          onFileTripleClick
+            ? () => node.file && onFileTripleClick(node.file)
             : undefined
         }
         onContextMenu={
@@ -378,6 +393,7 @@ function FileTreeNodeView({
           selectedFiles={selectedFiles}
           onFileClick={onFileClick}
           onFileDoubleClick={onFileDoubleClick}
+          onFileTripleClick={onFileTripleClick}
           onFileContextMenu={onFileContextMenu}
           renderExtraColumns={renderExtraColumns}
           renderDirExtra={renderDirExtra}
@@ -399,6 +415,7 @@ function FileRow({
   isSelected,
   onClick,
   onDoubleClick,
+  onTripleClick,
   onContextMenu,
   directoryHint,
   renderExtraColumns,
@@ -410,6 +427,7 @@ function FileRow({
   isSelected: boolean;
   onClick: (e: React.MouseEvent) => void;
   onDoubleClick?: () => void;
+  onTripleClick?: () => void;
   onContextMenu?: (e: React.MouseEvent) => void;
   directoryHint?: string;
   renderExtraColumns?: (file: DiffFile) => React.ReactNode;
@@ -421,11 +439,16 @@ function FileRow({
     : defaultColor;
   const FileIcon = getFileIcon(name);
 
+  const handleClick = useMultiClick<React.MouseEvent>({
+    1: onClick,
+    2: onDoubleClick,
+    3: onTripleClick,
+  });
+
   return (
     <div
       className={`selectable-row${isSelected ? " selected" : ""}`}
-      onClick={onClick}
-      onDoubleClick={onDoubleClick}
+      onClick={handleClick}
       onContextMenu={(e) => {
         if (onContextMenu) {
           e.preventDefault();
@@ -439,6 +462,7 @@ function FileRow({
         gap: 4,
         padding: `2px 12px 2px ${12 + depth * 16}px`,
         color: statusColor,
+        userSelect: "none",
       }}
     >
       <FileIcon style={{ flexShrink: 0, width: 16, height: 16 }} />
@@ -479,6 +503,7 @@ function FlatView({
   selectedFiles,
   onFileClick,
   onFileDoubleClick,
+  onFileTripleClick,
   onFileContextMenu,
   renderExtraColumns,
   statusColorOverride,
@@ -487,6 +512,7 @@ function FlatView({
   selectedFiles: string[];
   onFileClick: (e: React.MouseEvent, file: DiffFile) => void;
   onFileDoubleClick?: (file: DiffFile) => void;
+  onFileTripleClick?: (file: DiffFile) => void;
   onFileContextMenu?: (e: React.MouseEvent, file: DiffFile) => void;
   renderExtraColumns?: (file: DiffFile) => React.ReactNode;
   statusColorOverride?: (file: DiffFile) => string | undefined;
@@ -518,6 +544,9 @@ function FlatView({
             onClick={(e) => onFileClick(e, file)}
             onDoubleClick={
               onFileDoubleClick ? () => onFileDoubleClick(file) : undefined
+            }
+            onTripleClick={
+              onFileTripleClick ? () => onFileTripleClick(file) : undefined
             }
             onContextMenu={
               onFileContextMenu ? (e) => onFileContextMenu(e, file) : undefined

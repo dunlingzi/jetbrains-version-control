@@ -1,12 +1,15 @@
 .vscode/**
 .vscode-test/**
 .claude/**
+.kiro/**
+.omc/**
 out/**
 node_modules/**
 src/**
 webview/**
 docs/**
 .gitignore
+.git/**
 .npmrc
 .yarnrc
 esbuild.js
@@ -20,5 +23,19 @@ CLAUDE.md
 **/*.map
 **/*.ts
 **/.vscode-test.*
+**/.DS_Store
+
+# Local editor / IDE cruft. Not in .gitignore's reach for vsce, which only
+# reads this file — these were shipping stale copies of package.json.
+.history/**
+.idea/**
+
+# Already-built release artifacts must never end up inside the next package.
+*.vsix
+
+# Unreferenced: nothing in README.md, README.zh_CN.md, package.json or the
+# webview points at these. logo.png alone was ~1.1MB of the package.
+images/logo.png
+images/icon-128.png
 images/assets/**
 images/*.gif

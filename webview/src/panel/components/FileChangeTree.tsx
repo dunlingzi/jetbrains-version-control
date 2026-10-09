@@ -1,10 +1,12 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import CodiconListFlat from "~icons/codicon/list-flat";
 import CodiconListTree from "~icons/codicon/list-tree";
+import { bridge } from "../../shared/bridge";
 import { FileTree } from "../../shared/components/FileTree";
 import { Tooltip } from "../../shared/components/Tooltip";
 import "../../shared/components/Tooltip.css";
 import { t } from "../../shared/i18n";
+import { useFocusContextKey } from "../../shared/hooks/useFocusContextKey";
 import { usePanelStore } from "../../shared/store/panel-store";
 import type { DiffFile } from "../../shared/types/git";
 import { FileContextMenu } from "./FileContextMenu";
@@ -15,10 +17,6 @@ export function FileChangeTree() {
   const selectedCommitHash = usePanelStore((s) => s.selectedCommitHash);
   const selectFile = usePanelStore((s) => s.selectFile);
   const openDiffEditor = usePanelStore((s) => s.openDiffEditor);
-  const lastClickRef = useRef<{ path: string; time: number }>({
-    path: "",
-    time: 0,
-  });
 
   const [viewMode, setViewMode] = useState<"tree" | "flat">("tree");
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
@@ -28,24 +26,42 @@ export function FileChangeTree() {
     file: DiffFile;
   } | null>(null);
 
+  // Single click only selects. Double / triple click are handled by FileTree via
+  // its own multi-click sequence, so no timing state is kept here.
   const handleFileClick = useCallback(
     (_e: React.MouseEvent, file: DiffFile) => {
-      const now = Date.now();
-      const last = lastClickRef.current;
-      const filePath = file.newPath || file.oldPath;
+      selectFile(file.newPath || file.oldPath);
+    },
+    [selectFile],
+  );
 
-      if (last.path === filePath && now - last.time < 400) {
-        if (selectedCommitHash) {
-          openDiffEditor(selectedCommitHash, file);
-        }
-        lastClickRef.current = { path: "", time: 0 };
-      } else {
-        selectFile(filePath);
-        lastClickRef.current = { path: filePath, time: now };
+  const handleOpenDiff = useCallback(
+    (file: DiffFile) => {
+      if (selectedCommitHash) {
+        openDiffEditor(selectedCommitHash, file);
       }
     },
-    [selectedCommitHash, selectFile, openDiffEditor],
+    [selectedCommitHash, openDiffEditor],
   );
+
+  const handleJumpToSource = useCallback((file: DiffFile) => {
+    void bridge.request("openFile", {
+      filePath: file.newPath || file.oldPath,
+    });
+  }, []);
+
+  // Jump to Source (F4 / Cmd+Down) for the row selected in this list.
+  useFocusContextKey("jgc.gitLogPanelFocused");
+  useEffect(() => {
+    return bridge.onEvent((event) => {
+      // The broadcast reaches every webview, so only act if this one has focus.
+      if (event !== "jumpToSourceRequested" || !document.hasFocus()) return;
+      const file = commitFiles.find(
+        (f) => (f.newPath || f.oldPath) === selectedFilePath,
+      );
+      if (file) handleJumpToSource(file);
+    });
+  }, [commitFiles, selectedFilePath, handleJumpToSource]);
 
   const handleFileContextMenu = useCallback(
     (e: React.MouseEvent, file: DiffFile) => {
@@ -106,7 +122,6 @@ export function FileChangeTree() {
             fontWeight: 600,
             fontSize: "0.8em",
             opacity: 0.6,
-            textTransform: "uppercase",
           }}
         >
           {t("panel.files.changed")}
@@ -160,6 +175,8 @@ export function FileChangeTree() {
           viewMode={viewMode}
           selectedFiles={selectedFiles}
           onFileClick={handleFileClick}
+          onFileDoubleClick={handleOpenDiff}
+          onFileTripleClick={handleJumpToSource}
           onFileContextMenu={handleFileContextMenu}
           collapsed={collapsed}
           onToggle={toggleCollapse}

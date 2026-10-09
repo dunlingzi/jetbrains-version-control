@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { bridge, bridgeWithProgress } from "../../shared/bridge";
 import { t } from "../../shared/i18n";
+import { useJumpToSourceShortcutLabel } from "../../shared/shortcuts";
 import { usePanelStore } from "../../shared/store/panel-store";
 import type { DiffFile } from "../../shared/types/git";
 
@@ -133,6 +134,7 @@ interface FileContextMenuProps {
 }
 
 export function FileContextMenu({ x, y, file, onClose }: FileContextMenuProps) {
+  const jumpToSourceLabel = useJumpToSourceShortcutLabel();
   const menuRef = useRef<HTMLDivElement>(null);
   const selectedCommitHash = usePanelStore((s) => s.selectedCommitHash);
   const openDiffEditor = usePanelStore((s) => s.openDiffEditor);
@@ -310,22 +312,17 @@ export function FileContextMenu({ x, y, file, onClose }: FileContextMenuProps) {
     action: () => void;
     separator?: boolean;
     icon?: React.ReactNode;
+    shortcut?: string;
   }[] = [
-    {
-      label: t("panel.filesMenu.showDiff"),
-      action: handleShowDiff,
-      icon: <IconDiff />,
-    },
+    { label: t("panel.filesMenu.showDiff"), action: handleShowDiff, icon: <IconDiff /> },
     { label: "", action: () => {}, separator: true },
     {
       label: t("panel.filesMenu.editSource"),
       action: handleEditSource,
       icon: <IconEdit />,
+      shortcut: jumpToSourceLabel || undefined,
     },
-    {
-      label: t("panel.filesMenu.openRepoVersion"),
-      action: handleOpenRepoVersion,
-    },
+    { label: t("panel.filesMenu.openRepoVersion"), action: handleOpenRepoVersion },
     { label: "", action: () => {}, separator: true },
     {
       label: t("panel.filesMenu.revertSelected"),
@@ -414,6 +411,18 @@ export function FileContextMenu({ x, y, file, onClose }: FileContextMenuProps) {
               {item.icon ?? null}
             </span>
             {item.label}
+            {item.shortcut && (
+              <span
+                style={{
+                  marginLeft: "auto",
+                  paddingLeft: 24,
+                  opacity: 0.5,
+                  fontSize: 11,
+                }}
+              >
+                {item.shortcut}
+              </span>
+            )}
           </div>
         ),
       )}
