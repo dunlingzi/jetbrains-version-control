@@ -6,6 +6,7 @@ import { promisify } from "node:util";
 import { GitCache } from "./cache";
 import { computeGraphLayout } from "./graphLayout";
 import {
+  parseDiffGitHeader,
   parseDiffNameStatus,
   splitStatusPaths,
   unquoteGitPath,
@@ -1340,10 +1341,10 @@ export class GitService {
     const files: string[] = [];
     const lines = patchContent.split("\n");
     for (const line of lines) {
-      // Match: diff --git a/path b/path
-      const diffMatch = line.match(/^diff --git a\/(.+?) b\/(.+)$/);
-      if (diffMatch) {
-        files.push(unquoteGitPath(diffMatch[2]));
+      // Match: diff --git a/<old> b/<new> (bare or C-quoted per side)
+      const diffPath = parseDiffGitHeader(line);
+      if (diffPath !== null) {
+        files.push(diffPath);
         continue;
       }
       // Match: Index: path

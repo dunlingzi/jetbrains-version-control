@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  parseDiffGitHeader,
   parseDiffNameStatus,
   splitStatusPaths,
   unquoteGitPath,
@@ -111,6 +112,81 @@ describe("splitStatusPaths", () => {
       path: '"c.txt',
       oldPath: 'a"b.txt',
     });
+  });
+});
+
+describe("parseDiffGitHeader", () => {
+  // 以下输入都是 git 实际打印的 diff --git 头，粘贴自真实仓库输出。
+
+  it("reads a bare header", () => {
+    assert.equal(
+      parseDiffGitHeader("diff --git a/plain.txt b/plain.txt"),
+      "plain.txt",
+    );
+  });
+
+  it("reads a bare header whose path contains a space", () => {
+    assert.equal(
+      parseDiffGitHeader("diff --git a/has space.txt b/has space.txt"),
+      "has space.txt",
+    );
+  });
+
+  it("reads a bare header with raw non-ASCII (core.quotepath=false)", () => {
+    assert.equal(
+      parseDiffGitHeader("diff --git a/文档.txt b/文档.txt"),
+      "文档.txt",
+    );
+  });
+
+  it("reads a header quoted on both sides because of a double quote", () => {
+    // git 把整个 token 连 a/ b/ 前缀一起加引号，裸 a/ 开头的正则匹配不上
+    assert.equal(
+      parseDiffGitHeader('diff --git "a/has\\"quote.txt" "b/has\\"quote.txt"'),
+      'has"quote.txt',
+    );
+  });
+
+  it("reads a header quoted for octal-escaped non-ASCII", () => {
+    assert.equal(
+      parseDiffGitHeader(
+        'diff --git "a/\\344\\270\\255\\346\\226\\207.txt" "b/\\344\\270\\255\\346\\226\\207.txt"',
+      ),
+      "中文.txt",
+    );
+  });
+
+  it("does not split a bare path on the ' b/' inside the filename", () => {
+    assert.equal(
+      parseDiffGitHeader("diff --git a/foo b/bar.txt b/foo b/bar.txt"),
+      "foo b/bar.txt",
+    );
+  });
+
+  it("keeps the new side of a rename, where the halves differ", () => {
+    assert.equal(
+      parseDiffGitHeader("diff --git a/old.txt b/new.txt"),
+      "new.txt",
+    );
+  });
+
+  it("reads a quoted rename", () => {
+    assert.equal(
+      parseDiffGitHeader('diff --git "a/old.txt" "b/\\346\\226\\260.txt"'),
+      "新.txt",
+    );
+  });
+
+  it("returns null for lines that are not headers", () => {
+    assert.equal(parseDiffGitHeader("index 1234567..89abcde 100644"), null);
+    assert.equal(parseDiffGitHeader("--- a/plain.txt"), null);
+    assert.equal(parseDiffGitHeader("+++ b/plain.txt"), null);
+    assert.equal(parseDiffGitHeader("diff --git "), null);
+    assert.equal(parseDiffGitHeader(""), null);
+  });
+
+  it("returns null for a malformed quoted header with no closing quote", () => {
+    assert.equal(parseDiffGitHeader('diff --git "a/unclosed.txt'), null);
   });
 });
 

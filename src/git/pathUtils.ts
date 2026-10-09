@@ -90,6 +90,87 @@ function findClosingQuote(text: string, start: number): number {
 }
 
 /**
+ * Strip a leading `a/` or `b/` prefix, reporting whether it was one of those.
+ */
+function stripDiffPrefix(token: string, expected: "a" | "b"): string | null {
+  const prefix = `${expected}/`;
+  return token.startsWith(prefix) ? token.slice(prefix.length) : null;
+}
+
+/**
+ * Parse the path pair out of a `diff --git a/<old> b/<new>` header.
+ *
+ * git prints the header in two shapes, and the obvious
+ * `/^diff --git a\/(.+?) b\/(.+)$/` only handles the first:
+ *
+ *   diff --git a/plain.txt b/plain.txt
+ *   diff --git "a/has\"quote.txt" "b/has\"quote.txt"
+ *
+ * Whenever either path needs C-style quoting, git quotes the *whole* token
+ * including its `a/`/`b/` prefix, so a regex anchored on a bare `a/` silently
+ * drops those files. Each shape is handled separately rather than with one
+ * permissive pattern, because the unquoted shape is genuinely ambiguous: a
+ * path may itself contain " b/" (`a/foo b/bar.txt b/foo b/bar.txt`), so we
+ * cannot just split on the first occurrence.
+ *
+ * Returns the new path (the `b/` side), or null when the line is not a header.
+ */
+export function parseDiffGitHeader(line: string): string | null {
+  const rest = line.startsWith("diff --git ") ? line.slice(11) : null;
+  if (rest === null || rest.length === 0) {
+    return null;
+  }
+
+  // Quoted form: two independently quoted tokens, each carrying its prefix.
+  if (rest.startsWith('"')) {
+    const close = findClosingQuote(rest, 1);
+    if (close === -1) {
+      return null;
+    }
+    const oldPath = stripDiffPrefix(
+      unquoteGitPath(rest.slice(0, close + 1)),
+      "a",
+    );
+    const tail = rest.slice(close + 1);
+    if (oldPath === null || !tail.startsWith(' "b/')) {
+      return null;
+    }
+    // The tail has no trailing context beyond the closing quote, so unquoting
+    // the whole remainder is safe: git emits exactly two tokens here.
+    return stripDiffPrefix(unquoteGitPath(tail.slice(1)), "b");
+  }
+
+  // Unquoted form: split on the " b/" that makes the header symmetric. git
+  // echoes the same path on both sides for every hunk except renames and
+  // copies, so requiring the halves to mirror each other resolves the
+  // ambiguity that a naive first-match split leaves open.
+  const candidate = rest;
+  for (
+    let i = candidate.indexOf(" b/");
+    i !== -1;
+    i = candidate.indexOf(" b/", i + 1)
+  ) {
+    const left = candidate.slice(0, i);
+    const right = candidate.slice(i + 1);
+    if (!left.startsWith("a/")) {
+      continue;
+    }
+    const newPath = stripDiffPrefix(right, "b");
+    if (newPath !== null && newPath === left.slice(2)) {
+      return newPath;
+    }
+  }
+
+  // Renames and copies: the halves legitimately differ, so fall back to the
+  // first " b/" and trust the trailing side, which is what callers want.
+  const first = candidate.indexOf(" b/");
+  if (first === -1 || !candidate.startsWith("a/")) {
+    return null;
+  }
+  return stripDiffPrefix(candidate.slice(first + 1), "b");
+}
+
+/**
  * Split the path field of a `git status --porcelain` entry.
  *
  * Renames read `old -> new`, but a file literally named `a -> b` is printed
