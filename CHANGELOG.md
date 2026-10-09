@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Fixed / 修复
+- **All-caps headings** — the Commit panel's file group headers and their file counts, plus the section headers in the Commit toolbar, Git Log list and branch sidebar context menus, were forced to all caps: `UNVERSIONED FILES` and `12 FILES` instead of `Unversioned Files` and `12 files`, `ON SINGLE CLICK` instead of `On Single Click` / Commit 面板的文件分组标题及文件计数，以及 Commit 工具栏、Git Log 列表、分支侧边栏右键菜单的分节标题被强制转为全大写：`UNVERSIONED FILES`、`12 FILES`、`ON SINGLE CLICK`
 - **Non-ASCII filenames** — Chinese and other non-ASCII filenames were shown as octal escape sequences such as `\344\270\255\346\226\207.txt` instead of `中文.txt`, and every Git operation on them (open diff, stage, discard, shelve) failed. Reported by @dunlingzi in #3, fixed in #4 / 中文等非 ASCII 文件名会显示成八进制转义串（如 `\344\270\255\346\226\207.txt`）而非文件名本身，且对这些文件的 Git 操作（打开 diff、暂存、撤销、shelve）全部失败 - 由 @dunlingzi 在 #3 中报告，#4 修复
   - Paths are now decoded before use, so Git receives the real filename / 路径在使用前会先解码，Git 收到的是真实文件名
   - Filenames containing a space, a double quote or an arrow are handled too, including a file literally named `a -> b` / 同时也能正确处理含空格、双引号或箭头的文件名，包括名字里就带 `a -> b` 的文件
