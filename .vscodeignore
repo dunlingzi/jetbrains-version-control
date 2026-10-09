@@ -3,6 +3,7 @@
 .claude/**
 .kiro/**
 .omc/**
+.superpowers/**
 out/**
 node_modules/**
 src/**
