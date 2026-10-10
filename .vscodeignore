@@ -3,6 +3,7 @@
 .claude/**
 .kiro/**
 .omc/**
+.superpowers/**
 out/**
 node_modules/**
 src/**
@@ -13,6 +14,7 @@ docs/**
 .npmrc
 .yarnrc
 esbuild.js
+scripts/**
 vsc-extension-quickstart.md
 biome.json
 pnpm-lock.yaml

@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Added / 新增
+- **Multi-language support (i18n)** — the extension follows the VS Code display language across every surface / 多语言支持（i18n）—— 扩展自动跟随 VS Code 显示语言，所有界面一致切换
+  - Webview panels (Git Log / Commit / Push / Rollback / Conflicts / Worktree) localized via a custom `t()/tpl()` helper; dictionaries bundled into the extension / 网页视图面板（Git Log / 提交 / 推送 / 回滚 / 冲突 / 工作树）改用自定义 `t()/tpl()` 助手本地化，词典随扩展打包
+  - VS Code contribution points (views, commands, config title) localized via `package.nls.<locale>.json` / VS Code 贡献点（视图、命令、配置标题）经 `package.nls.<locale>.json` 本地化
+  - Extension notifications localized via the `vscode.l10n` API and `l10n/bundle.l10n.<locale>.json` / 扩展通知经 `vscode.l10n` 与 `l10n/bundle.l10n.<locale>.json` 本地化
+  - Shipped locales: English + Simplified Chinese; `jgc.locale` can force a language / 内置语言：英文 + 简体中文；可用 `jgc.locale` 强制指定
+  - Adding a language is a single-file change (`webview/src/l10n/<locale>.json`) + `pnpm run generate:nls` / 新增语言只需修改单一文件并运行 `pnpm run generate:nls`
+
 ### Fixed / 修复
 - **All-caps headings** — headings across the Commit, Push and Git Log panels were forced to all caps: the Commit panel's file group headers and their file counts, the section headers in the Commit toolbar, Git Log list and branch sidebar context menus, and the Push panel's remote branch sections. `UNVERSIONED FILES` and `12 FILES` now read `Unversioned Files` and `12 files`, `ON SINGLE CLICK` reads `On Single Click`, `REMOTE` and `BRANCH` read `Remote` and `Branch` / Commit、Push、Git Log 面板的标题此前被强制转为全大写：Commit 面板的文件分组标题及文件计数、Commit 工具栏与 Git Log 列表与分支侧边栏右键菜单的分节标题、Push 面板的远程分支分节标题。`UNVERSIONED FILES` 与 `12 FILES` 现显示为 `Unversioned Files` 与 `12 files`，`ON SINGLE CLICK` 显示为 `On Single Click`，`REMOTE`、`BRANCH` 显示为 `Remote`、`Branch`
 - **Non-ASCII filenames** — Chinese and other non-ASCII filenames were shown as octal escape sequences such as `\344\270\255\346\226\207.txt` instead of `中文.txt`, and every Git operation on them (open diff, stage, discard, shelve) failed. Reported by @dunlingzi in #3, fixed in #4 / 中文等非 ASCII 文件名会显示成八进制转义串（如 `\344\270\255\346\226\207.txt`）而非文件名本身，且对这些文件的 Git 操作（打开 diff、暂存、撤销、shelve）全部失败 - 由 @dunlingzi 在 #3 中报告，#4 修复

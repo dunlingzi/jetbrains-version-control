@@ -23,6 +23,9 @@ export function getWebviewHtml(
   const nonce = getNonce();
 
   const dataAttrs = [`data-mode="${mode}"`];
+  // i18n:注入当前语言(默认跟随 vscode.env.language,可用 jgc.locale 强制覆盖)
+  const locale = currentLocale();
+  dataAttrs.push(`data-locale="${escapeHtml(locale)}"`);
   if (extra) {
     for (const [key, value] of Object.entries(extra)) {
       dataAttrs.push(`data-${key}="${escapeHtml(value)}"`);
@@ -30,7 +33,7 @@ export function getWebviewHtml(
   }
 
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="${escapeHtml(locale)}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -49,6 +52,15 @@ export function getWebviewHtml(
   <script nonce="${nonce}" src="${scriptUri}"></script>
 </body>
 </html>`;
+}
+
+/** 解析当前注入语言:jgc.locale 覆盖 > vscode.env.language > en */
+function currentLocale(): string {
+  const override = vscode.workspace
+    .getConfiguration("jgc")
+    .get<string>("locale");
+  const lang = (override ?? "").trim() || vscode.env.language || "en";
+  return lang.toLowerCase();
 }
 
 function getNonce(): string {

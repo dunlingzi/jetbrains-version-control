@@ -13,6 +13,7 @@
   "engines": {
     "vscode": "^1.85.0"
   },
+  "l10n": "./l10n",
   "categories": [
     "SCM Providers",
     "Other"
@@ -46,14 +47,14 @@
       "panel": [
         {
           "id": "git-brains-panel",
-"title": "JetBrains Git Control",
+          "title": "%contrib.app.panel%",
           "icon": "$(git-branch)"
         }
       ],
       "activitybar": [
         {
           "id": "git-brains-commit",
-          "title": "Commit",
+          "title": "%contrib.app.activity%",
           "icon": "images/commit-icon.svg"
         }
       ]
@@ -63,136 +64,135 @@
         {
           "type": "webview",
           "id": "git-brains.gitLog",
-          "name": "Git Log"
+          "name": "%contrib.view.gitLog%"
         },
         {
           "type": "webview",
           "id": "git-brains.worktrees",
-          "name": "Worktrees"
+          "name": "%contrib.view.worktrees%"
         }
       ],
       "git-brains-commit": [
         {
           "type": "webview",
           "id": "git-brains.commitPanel",
-          "name": "Commit"
+          "name": "%contrib.view.commitPanel%"
         }
       ]
     },
     "commands": [
       {
         "command": "git-brains.refreshLog",
-        "title": "Refresh Git Log",
+        "title": "%contrib.cmd.refreshLog%",
         "icon": "$(refresh)",
-        "category": "JGC"
+        "category": "%contrib.cmd.category%"
       },
       {
         "command": "git-brains.openMergeEditor",
-        "title": "Open Merge Editor",
-        "category": "JGC"
+        "title": "%contrib.cmd.openMergeEditor%",
+        "category": "%contrib.cmd.category%"
       },
       {
         "command": "git-brains.openConflicts",
-        "title": "Conflicts",
+        "title": "%contrib.cmd.openConflicts%",
         "icon": "$(git-merge)",
-        "category": "JGC"
+        "category": "%contrib.cmd.category%"
       },
       {
         "command": "git-brains.openMergeEditorFromSCM",
-        "title": "Open in JGC Merge Editor",
+        "title": "%contrib.cmd.openMergeEditorFromSCM%",
         "icon": "$(git-merge)",
-        "category": "JGC"
+        "category": "%contrib.cmd.category%"
       },
       {
         "command": "git-brains.showFileHistory",
-        "title": "(JetBrains Git Control) Show File History",
+        "title": "%contrib.cmd.showFileHistory%",
         "icon": "$(history)",
-        "category": "JGC"
+        "category": "%contrib.cmd.category%"
       },
       {
         "command": "git-brains.nextDiff",
-        "title": "Next File Diff",
+        "title": "%contrib.cmd.nextDiff%",
         "icon": "$(arrow-down)",
-        "category": "JGC"
+        "category": "%contrib.cmd.category%"
       },
       {
         "command": "git-brains.prevDiff",
-        "title": "Previous File Diff",
+        "title": "%contrib.cmd.prevDiff%",
         "icon": "$(arrow-up)",
-        "category": "JGC"
+        "category": "%contrib.cmd.category%"
       },
       {
         "command": "git-brains.commitPanel.refresh",
-        "title": "Refresh Changes",
+        "title": "%contrib.cmd.refreshChanges%",
         "icon": "$(refresh)",
-        "category": "JGC"
+        "category": "%contrib.cmd.category%"
       },
       {
         "command": "git-brains.commitPanel.commit",
-        "title": "Commit",
+        "title": "%contrib.cmd.commit%",
         "icon": "$(check)",
-        "category": "JGC"
+        "category": "%contrib.cmd.category%"
       },
       {
         "command": "git-brains.commitPanel.commitAndPush",
-        "title": "Commit and Push",
+        "title": "%contrib.cmd.commitAndPush%",
         "icon": "$(cloud-upload)",
-        "category": "JGC"
+        "category": "%contrib.cmd.category%"
       },
       {
         "command": "git-brains.commitPanel.shelve",
-        "title": "Shelve Changes",
+        "title": "%contrib.cmd.shelve%",
         "icon": "$(archive)",
-        "category": "JGC"
+        "category": "%contrib.cmd.category%"
       },
       {
         "command": "git-brains.commitPanel.unshelve",
-        "title": "Unshelve Changes",
+        "title": "%contrib.cmd.unshelve%",
         "icon": "$(package)",
-        "category": "JGC"
+        "category": "%contrib.cmd.category%"
       },
       {
         "command": "git-brains.commit.jumpToSource",
-        "title": "Jump to Source",
+        "title": "%contrib.cmd.jumpToSource%",
         "icon": "$(go-to-file)",
         "category": "JGC"
       },
       {
         "command": "git-brains.openPushPanel",
-        "title": "Push...",
+        "title": "%contrib.cmd.push%",
         "icon": "$(cloud-upload)",
-        "category": "JGC"
+        "category": "%contrib.cmd.category%"
       },
       {
         "command": "git-brains.editSource",
-        "title": "(JGC) Edit Source",
+        "title": "%contrib.cmd.editSource%",
         "icon": "$(go-to-file)",
-        "category": "JGC"
+        "category": "%contrib.cmd.category%"
       },
       {
         "command": "git-brains.annotateWithGitBlame",
-        "title": "Annotate with Git Blame",
-        "category": "JGC"
+        "title": "%contrib.cmd.annotate%",
+        "category": "%contrib.cmd.category%"
       },
       {
         "command": "git-brains.clearGitBlameAnnotation",
-        "title": "Close Annotations",
-        "category": "JGC"
+        "title": "%contrib.cmd.clearAnnotation%",
+        "category": "%contrib.cmd.category%"
       },
       {
         "command": "git-brains.worktrees.new",
-        "title": "New Worktree...",
+        "title": "%contrib.cmd.worktreeNew%",
         "icon": "$(add)",
-        "category": "JGC"
+        "category": "%contrib.cmd.category%"
       },
       {
         "command": "git-brains.worktrees.refresh",
-        "title": "Refresh Worktrees",
+        "title": "%contrib.cmd.worktreeRefresh%",
         "icon": "$(refresh)",
-        "category": "JGC"
+        "category": "%contrib.cmd.category%"
       }
     ],
-
     "menus": {
       "view/title": [],
       "editor/title": [
@@ -286,12 +286,27 @@
       }
     ],
     "configuration": {
-      "title": "JetBrains Git Control",
+      "title": "%contrib.config.title%",
       "properties": {
+        "jgc.locale": {
+          "type": "string",
+          "default": "",
+          "enum": [
+            "",
+            "en",
+            "zh-cn"
+          ],
+          "enumDescriptions": [
+            "%contrib.config.locale.auto%",
+            "English",
+            "简体中文"
+          ],
+          "markdownDescription": "%contrib.config.locale%"
+        },
         "jgc.shortcut.jumpToSourceLabel": {
           "type": "string",
           "default": "F4",
-          "markdownDescription": "Text shown next to **Jump to Source** / **Edit Source** in context menus. Webview menus are drawn by the extension, so this label cannot be derived from your keybindings automatically — update it (or set it to empty to hide) if you rebind the shortcut under **Preferences: Open Keyboard Shortcuts**."
+          "markdownDescription": "%contrib.config.shortcut.jumpToSourceLabel%"
         },
         "jgc.blame.displayMode": {
           "type": "string",
@@ -301,18 +316,18 @@
             "around"
           ],
           "enumDescriptions": [
-            "Annotate every line of the file",
-            "Only the line under the cursor",
-            "The cursor line plus N lines of context (see #jgc.blame.aroundLines#)"
+            "%contrib.config.blame.displayMode.all%",
+            "%contrib.config.blame.displayMode.cursor%",
+            "%contrib.config.blame.displayMode.around%"
           ],
           "default": "all",
-          "description": "Controls which lines show inline Git blame annotations."
+          "description": "%contrib.config.blame.displayMode.desc%"
         },
         "jgc.blame.aroundLines": {
           "type": "number",
           "default": 3,
           "minimum": 0,
-          "description": "Lines of context above/below the cursor when jgc.blame.displayMode is 'around'."
+          "description": "%contrib.config.blame.aroundLines.desc%"
         },
         "jgc.blame.columns": {
           "type": "array",
@@ -325,10 +340,10 @@
               "commitNumber"
             ],
             "enumDescriptions": [
-              "Short commit hash",
-              "Author date",
-              "Author name",
-              "Commit number (1 = newest)"
+              "%contrib.config.blame.columns.revision%",
+              "%contrib.config.blame.columns.date%",
+              "%contrib.config.blame.columns.author%",
+              "%contrib.config.blame.columns.commitNumber%"
             ]
           },
           "uniqueItems": true,
@@ -336,7 +351,7 @@
             "date",
             "author"
           ],
-          "description": "Which columns to show in inline Git blame annotations. Display order is always: Revision → Date → Author → Commit Number."
+          "description": "%contrib.config.blame.columns.desc%"
         },
         "jgc.blame.colorMode": {
           "type": "string",
@@ -346,12 +361,12 @@
             "hide"
           ],
           "enumDescriptions": [
-            "A distinct color per author",
-            "JetBrains-style coloring by commit age: recent commits stand out, old ones fade",
-            "Hide coloring: fixed foreground colors (#jgc.blame.foregroundColorLight# / #jgc.blame.foregroundColorDark#)"
+            "%contrib.config.blame.colorMode.author%",
+            "%contrib.config.blame.colorMode.order%",
+            "%contrib.config.blame.colorMode.hide%"
           ],
           "default": "order",
-          "description": "How inline Git blame annotations are colored."
+          "description": "%contrib.config.blame.colorMode.desc%"
         },
         "jgc.blame.nameStyle": {
           "type": "string",
@@ -363,29 +378,29 @@
             "email"
           ],
           "enumDescriptions": [
-            "Author initials (e.g. ZS)",
-            "Last name only",
-            "First name only",
-            "Full name",
-            "Author email"
+            "%contrib.config.blame.nameStyle.initials%",
+            "%contrib.config.blame.nameStyle.lastName%",
+            "%contrib.config.blame.nameStyle.firstName%",
+            "%contrib.config.blame.nameStyle.fullName%",
+            "%contrib.config.blame.nameStyle.email%"
           ],
           "default": "fullName",
-          "description": "How the author name is displayed in inline Git blame annotations."
+          "description": "%contrib.config.blame.nameStyle.desc%"
         },
         "jgc.blame.dateFormat": {
           "type": "string",
           "default": "yyyy-MM-dd HH:mm",
-          "description": "Date format for inline blame annotations. Tokens: yyyy MM dd HH mm ss."
+          "description": "%contrib.config.blame.dateFormat.desc%"
         },
         "jgc.blame.foregroundColorLight": {
           "type": "string",
           "default": "#57606a",
-          "description": "Inline blame annotation color for light themes."
+          "description": "%contrib.config.blame.light.desc%"
         },
         "jgc.blame.foregroundColorDark": {
           "type": "string",
           "default": "#8b949e",
-          "description": "Inline blame annotation color for dark themes."
+          "description": "%contrib.config.blame.dark.desc%"
         },
         "jgc.worktree.openBehavior": {
           "type": "string",
@@ -395,12 +410,12 @@
             "newWindow"
           ],
           "enumDescriptions": [
-            "Always ask which window to open in",
-            "Always open in the current window",
-            "Always open in a new window"
+            "%contrib.config.worktree.ask%",
+            "%contrib.config.worktree.thisWindow%",
+            "%contrib.config.worktree.newWindow%"
           ],
           "default": "ask",
-          "description": "Controls how projects are opened from Git worktrees."
+          "description": "%contrib.config.worktree.openBehavior.desc%"
         }
       }
     }
@@ -424,7 +439,8 @@
     "test:unit": "node --test --disable-warning=MODULE_TYPELESS_PACKAGE_JSON \"src/**/*.test.ts\"",
     "build:web": "cd webview && pnpm run build",
     "build": "pnpm run compile && pnpm run build:web",
-    "dev:web": "cd webview && pnpm run dev"
+    "dev:web": "cd webview && pnpm run dev",
+    "generate:nls": "node scripts/sync-nls.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.15",
